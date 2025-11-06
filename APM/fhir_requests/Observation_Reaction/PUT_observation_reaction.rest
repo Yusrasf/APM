@@ -1,0 +1,52 @@
+### Element: status for Immunization.reaction.manifestation
+### Update the status of an existing Observation
+PUT http://localhost:8080/fhir/Observation/{id}
+Content-Type: application/fhir+json
+Accept: application/fhir+json
+
+{
+  "resourceType": "Observation",
+
+  "status": "final",
+  
+
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "laboratory",
+          "display": "Laboratory"
+        }
+      ]
+    }
+  ],
+
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "ASSERTION_CODE",  // Replace with code for reaction/manifestation
+        "display": "Immunization Reaction"
+      }
+    ]
+  },
+
+  "subject": {
+    "reference": "Patient/{patient-id}"
+  },
+
+  "encounter": {
+    "reference": "Encounter/{encounter-id}"  // Optional: link to encounter
+  },
+
+  "effectiveDateTime": "YYYY-MM-DDThh:mm:ss+TZ",
+
+  "valueString": "Mild fever and rash",  // Description of the reaction
+
+  "derivedFrom": [
+    {
+      "reference": "Immunization/{immunization-id}"
+    }
+  ]
+}

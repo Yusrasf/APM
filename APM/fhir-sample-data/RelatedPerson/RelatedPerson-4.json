@@ -1,0 +1,35 @@
+{
+  "resourceType": "RelatedPerson",
+  "id": "relatedperson-4",
+  "patient": {
+    "reference": "Patient/patient-4"
+  },
+  "relationship": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+          "code": "PRN",
+          "display": "Parent"
+        }
+      ],
+      "text": "Elternteil"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Gruber",
+      "given": [
+        "Martin"
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+43 732 123456",
+      "use": "home"
+    }
+  ]
+}

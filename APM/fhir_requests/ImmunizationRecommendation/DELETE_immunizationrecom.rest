@@ -1,0 +1,8 @@
+### Delete a specific ImmunizationRecommendation by ID
+DELETE http://localhost:8080/fhir/ImmunizationRecommendation/{id}
+Accept: application/fhir+json
+
+### Delete all ImmunizationRecommendations for a specific patient
+DELETE http://localhost:8080/fhir/ImmunizationRecommendation?patient={patient-id}
+Accept: application/fhir+json
+

@@ -1,0 +1,16 @@
+{
+  "resourceType": "Organization",
+  "id": "clinic-10",
+  "name": "Kinderarztpraxis Dornbirn",
+  "address": [
+    {
+      "type": "both",
+      "line": [
+        "Bahnhofstraße 15"
+      ],
+      "city": "Dornbirn",
+      "postalCode": "6850",
+      "country": "AT"
+    }
+  ]
+}

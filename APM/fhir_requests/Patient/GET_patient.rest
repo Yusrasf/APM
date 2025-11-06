@@ -1,0 +1,25 @@
+### List all Patients
+GET http://localhost:8080/fhir/Patient/
+Accept: application/fhir+json
+
+
+
+### GET Patient by ID
+### Retrieves a specific Patient record by ID
+GET http://localhost:8080/fhir/Patient/{id}
+Accept: application/fhir+json
+
+### GET Patient by Identifier
+### Retrieves a patient using their national ID or unique identifier
+GET http://localhost:8080/fhir/Patient?identifier=http://example.org/national-id|123456789
+Accept: application/fhir+json
+
+### GET Patient by Gender
+### Retrieves all male patients
+GET http://localhost:8080/fhir/Patient?gender=male
+Accept: application/fhir+json
+
+### GET Patients by Postal Code
+### Retrieves patients with a specific postal code
+GET http://localhost:8080/fhir/Patient?address-postalcode=010101
+Accept: application/fhir+json

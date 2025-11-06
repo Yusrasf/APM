@@ -1,0 +1,45 @@
+{
+  "resourceType": "Patient",
+  "id": "patient-4",
+  "identifier": [
+    {
+      "system": "urn:oid:1.2.276.0.76.4.1",
+      "value": "AT100000004",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "SB",
+            "display": "Social Beneficiary Number"
+          }
+        ]
+      }
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Gruber",
+      "given": [
+        "Leonie"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "2024-07-15",
+  "address": [
+    {
+      "type": "both",
+      "line": [
+        "Hauptplatz 1"
+      ],
+      "city": "Linz",
+      "postalCode": "4020",
+      "country": "AT"
+    }
+  ],
+  "managingOrganization": {
+    "reference": "Organization/clinic-4",
+    "display": "Kinderarztpraxis Linz"
+  }
+}

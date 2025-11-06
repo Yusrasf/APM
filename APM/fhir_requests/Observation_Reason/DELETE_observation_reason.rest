@@ -1,0 +1,4 @@
+### DELETE an Observation for Immunization.reason
+DELETE http://localhost:8080/fhir/Observation/{id}
+Accept: application/fhir+json
+

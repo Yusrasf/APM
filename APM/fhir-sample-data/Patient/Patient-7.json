@@ -1,0 +1,45 @@
+{
+  "resourceType": "Patient",
+  "id": "patient-7",
+  "identifier": [
+    {
+      "system": "urn:oid:1.2.276.0.76.4.1",
+      "value": "AT100000007",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "SB",
+            "display": "Social Beneficiary Number"
+          }
+        ]
+      }
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Weber",
+      "given": [
+        "Maximilian"
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "2024-01-25",
+  "address": [
+    {
+      "type": "both",
+      "line": [
+        "Domplatz 2"
+      ],
+      "city": "St. Pölten",
+      "postalCode": "3100",
+      "country": "AT"
+    }
+  ],
+  "managingOrganization": {
+    "reference": "Organization/clinic-7",
+    "display": "Kinderarztpraxis St. Pölten"
+  }
+}

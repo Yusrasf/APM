@@ -1,0 +1,16 @@
+{
+  "resourceType": "Organization",
+  "id": "clinic-7",
+  "name": "Kinderarztpraxis St. Pölten",
+  "address": [
+    {
+      "type": "both",
+      "line": [
+        "Domplatz 2"
+      ],
+      "city": "St. Pölten",
+      "postalCode": "3100",
+      "country": "AT"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+### Fetch all ImmunizationRecommendations
+GET http://localhost:8080/fhir/ImmunizationRecommendation
+Accept: application/fhir+json
+
+### Fetch a specific ImmunizationRecommendation by ID
+GET http://localhost:8080/fhir/ImmunizationRecommendation/{id}
+Accept: application/fhir+json
+
+### Fetch all ImmunizationRecommendations for a patient
+GET http://localhost:8080/fhir/ImmunizationRecommendation?patient={patient-id}
+Accept: application/fhir+json
+
+### Fetch all ImmunizationRecommendations with a specific status
+GET http://localhost:8080/fhir/ImmunizationRecommendation?status={status}
+Accept: application/fhir+json
+
+### Fetch all ImmunizationRecommendations by patient ID and status
+GET http://localhost:8080/fhir/ImmunizationRecommendation?patient={patient-id}&status=due
+Accept: application/fhir+json
+

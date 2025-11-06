@@ -1,0 +1,52 @@
+### Element: Observation for Immunization.reaction.manifestation
+### Create an Observation recording a reaction to a specific Immunization
+POST http://localhost:8080/fhir/Observation
+Content-Type: application/fhir+json
+Accept: application/fhir+json
+
+{
+  "resourceType": "Observation",
+
+  "status": "final",
+
+
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "laboratory",
+          "display": "Laboratory"
+        }
+      ]
+    }
+  ],
+
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "ASSERTION_CODE",  // Replace with code for reaction/manifestation
+        "display": "Immunization Reaction"
+      }
+    ]
+  },
+
+  "subject": {
+    "reference": "Patient/{patient-id}"
+  },
+
+  "encounter": {
+    "reference": "Encounter/{encounter-id}"  // Optional: link to encounter
+  },
+
+  "effectiveDateTime": "YYYY-MM-DDThh:mm:ss+TZ",
+
+  "valueString": "Mild fever and rash",  // Description of the reaction
+
+  "derivedFrom": [
+    {
+      "reference": "Immunization/{immunization-id}"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+### DELETE RelatedPerson
+### Deletes a RelatedPerson record by ID
+DELETE http://localhost:8080/fhir/RelatedPerson/{id}
+Accept: application/fhir+json
+

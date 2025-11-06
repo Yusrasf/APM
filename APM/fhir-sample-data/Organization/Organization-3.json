@@ -1,0 +1,16 @@
+{
+  "resourceType": "Organization",
+  "id": "clinic-3",
+  "name": "Kinderarztpraxis Salzburg",
+  "address": [
+    {
+      "type": "both",
+      "line": [
+        "Getreidegasse 8"
+      ],
+      "city": "Salzburg",
+      "postalCode": "5020",
+      "country": "AT"
+    }
+  ]
+}

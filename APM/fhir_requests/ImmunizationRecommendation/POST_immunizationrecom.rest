@@ -1,0 +1,59 @@
+### Create a new ImmunizationRecommendation for a patient
+POST http://localhost:8080/fhir/ImmunizationRecommendation
+Content-Type: application/fhir+json
+Accept: application/fhir+json
+
+{
+  "resourceType": "ImmunizationRecommendation",
+
+  "patient": {
+    "reference": "Patient/{patient-id}"
+  },
+
+  "date": "YYYY-MM-DDThh:mm:ss+TZ",
+
+  "authority": {
+    "reference": "Organization/{organization-id}"
+  },
+  
+
+  "recommendation": [
+    {
+      "vaccineCode": [
+        {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/cvx",
+              "code": "XXX",
+              "display": "Vaccine Name"
+            }
+          ]
+        }
+      ],
+      "targetDisease": [
+        {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "XXXXXX",
+              "display": "Disease Name"
+            }
+          ]
+        }
+      ],
+      "forecastStatus": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/immunization-recommendation-status",
+            "code": "due",
+            "display": "Due"
+          }
+        ]
+      },
+      "description": "Recommended due to clinical assessment.",
+      "series": "Primary Series",
+      "doseNumber": 1,
+      "seriesDoses": 2
+    }
+  ]
+}

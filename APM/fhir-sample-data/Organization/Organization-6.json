@@ -1,0 +1,16 @@
+{
+  "resourceType": "Organization",
+  "id": "clinic-6",
+  "name": "Kinderarztpraxis Klagenfurt",
+  "address": [
+    {
+      "type": "both",
+      "line": [
+        "Neuer Platz 3"
+      ],
+      "city": "Klagenfurt",
+      "postalCode": "9010",
+      "country": "AT"
+    }
+  ]
+}

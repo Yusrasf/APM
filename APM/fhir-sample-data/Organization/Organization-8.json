@@ -1,0 +1,16 @@
+{
+  "resourceType": "Organization",
+  "id": "clinic-8",
+  "name": "Kinderarztpraxis Villach",
+  "address": [
+    {
+      "type": "both",
+      "line": [
+        "Hauptstraße 20"
+      ],
+      "city": "Villach",
+      "postalCode": "9500",
+      "country": "AT"
+    }
+  ]
+}

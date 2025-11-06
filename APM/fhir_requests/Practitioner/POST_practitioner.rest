@@ -1,0 +1,51 @@
+### POST Practitioner
+### Creates a new Practitioner record (doctor, nurse, or vaccinator)
+POST http://localhost:8080/fhir/Practitioner
+Content-Type: application/fhir+json
+Accept: application/fhir+json
+
+
+{
+  "resourceType": "Practitioner",
+
+  "identifier": [
+    {
+      "system": "http://example.org/practitioner-id",
+      "value": "PRAC-001"
+    }
+  ],
+
+  "name": [
+    {
+      "use": "official",
+      "family": "Smith",
+      "given": ["Anna"],
+      "prefix": ["Dr."]
+    }
+  ],
+
+  "gender": "female",
+  "birthDate": "1980-09-12",
+
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+40123123456",
+      "use": "work"
+    },
+    {
+      "system": "email",
+      "value": "anna.smith@cityclinic.ro"
+    }
+  ],
+
+  "address": [
+    {
+      "use": "work",
+      "line": ["45 Health Blvd"],
+      "city": "Bucharest",
+      "postalCode": "020202",
+      "country": "RO"
+    }
+  ]
+}

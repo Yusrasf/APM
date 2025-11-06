@@ -1,0 +1,16 @@
+{
+  "resourceType": "Organization",
+  "id": "clinic-9",
+  "name": "Kinderarztpraxis Wels",
+  "address": [
+    {
+      "type": "both",
+      "line": [
+        "Marktplatz 10"
+      ],
+      "city": "Wels",
+      "postalCode": "4600",
+      "country": "AT"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+### List all Observations - Immunization.reaction.manifestation
+GET http://localhost:8080/fhir/Observation
+Accept: application/fhir+json
+
+###
+
+### Get an Observation by ID - Immunization.reaction.manifestation
+GET http://localhost:8080/fhir/Observation/1
+Accept: application/fhir+json
+

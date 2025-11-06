@@ -1,0 +1,16 @@
+{
+  "resourceType": "Organization",
+  "id": "clinic-4",
+  "name": "Kinderarztpraxis Linz",
+  "address": [
+    {
+      "type": "both",
+      "line": [
+        "Hauptplatz 1"
+      ],
+      "city": "Linz",
+      "postalCode": "4020",
+      "country": "AT"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+### POST Patient
+### Creates a new Patient record
+POST http://localhost:8080/fhir/Patient
+Content-Type: application/fhir+json
+Accept: application/fhir+json
+
+
+{
+  "resourceType": "Patient",
+
+  "identifier": [
+    {
+      "system": "http://example.org/national-id",
+      "value": "123456789"
+    }
+  ],
+
+  "name": [
+    {
+      "use": "official",
+      "family": "Doe",
+      "given": ["John"]
+    }
+  ],
+
+  "gender": "male",
+  "birthDate": "1990-05-15",
+
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+40123123123",
+      "use": "mobile"
+    },
+    {
+      "system": "email",
+      "value": "john.doe@example.org"
+    }
+  ],
+
+  "address": [
+    {
+      "use": "home",
+      "line": ["123 Health St"],
+      "city": "Bucharest",
+      "postalCode": "010101",
+      "country":

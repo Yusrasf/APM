@@ -1,0 +1,15 @@
+### GET all provider Organizations
+### Retrieves all healthcare provider organizations (clinics, hospitals, etc.)
+GET http://localhost:8080/fhir/Organization
+Accept: application/fhir+json
+
+### GET specific Organization (Provider) by ID
+### Retrieves a single provider organization by its FHIR resource ID
+GET http://localhost:8080/fhir/Organization/{id}
+Accept: application/fhir+json
+
+### GET Organization by name (Provider)
+### Search for a provider organization by name
+GET http://localhost:8080/fhir/Organization?name=Central%20Medical%20Center
+Accept: application/fhir+json
+

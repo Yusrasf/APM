@@ -1,0 +1,4 @@
+### DELETE Organization for Immunization.manufacturer
+DELETE http://localhost:8080/fhir/Organization/{id}
+Accept: application/fhir+json
+

@@ -1,0 +1,71 @@
+### POST RelatedPerson
+### Creates a new RelatedPerson record linked to a Patient
+POST http://localhost:8080/fhir/RelatedPerson
+Content-Type: application/fhir+json
+Accept: application/fhir+json
+
+
+{
+  "resourceType": "RelatedPerson",
+
+  "identifier": [
+    {
+      "system": "http://example.org/relatedperson-id",
+      "value": "RP-001"
+    }
+  ],
+
+  "active": true,
+
+  "patient": {
+    "reference": "Patient/123", 
+    "display": "John Doe"
+  },
+
+  "relationship": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+          "code": "MTH",
+          "display": "Mother"
+        }
+      ],
+      "text": "Mother"
+    }
+  ],
+
+  "name": [
+    {
+      "use": "official",
+      "family": "Doe",
+      "given": ["Jane"]
+    }
+  ],
+
+  "gender": "female",
+
+  "birthDate": "1980-03-05",
+
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+40123123123",
+      "use": "mobile"
+    },
+    {
+      "system": "email",
+      "value": "jane.doe@email.com"
+    }
+  ],
+
+  "address": [
+    {
+      "use": "home",
+      "line": ["12 Green Street"],
+      "city": "Bucharest",
+      "postalCode": "010203",
+      "country": "RO"
+    }
+  ]
+}
