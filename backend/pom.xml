@@ -29,6 +29,7 @@
     <properties>
         <java.version>17</java.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -71,6 +72,13 @@
             <artifactId>hapi-fhir-server</artifactId>
             <version>7.0.0</version>
         </dependency>
+        <!-- HAPI FHIR Base -->
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-base</artifactId>
+            <version>7.0.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
