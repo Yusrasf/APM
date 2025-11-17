@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import jakarta.servlet.annotation.WebServlet;
 import org.apm.backend.fhir.PatientResourceProvider; ///replace, add
-import org.apm.backend.fhir.RelatedPersonResourceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class FHIRServerConfig extends RestfulServer{
     @Autowired
     private PatientResourceProvider patientResourceProvider;
-    private RelatedPersonResourceProvider relatedPersonResourceProvider;
+
 
     @Override
     protected void initialize() {
@@ -23,7 +22,7 @@ public class FHIRServerConfig extends RestfulServer{
 
         // Register resource providers
         registerProvider(patientResourceProvider);
-        registerProvider(relatedPersonResourceProvider);
+
 
         // Pretty JSON output
         setDefaultPrettyPrint(true);
