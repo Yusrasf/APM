@@ -1,0 +1,64 @@
+### PUT RelatedPerson
+### Updates an existing RelatedPerson record
+PUT http://localhost:8080/fhir/RelatedPerson/{id}
+Content-Type: application/fhir+json
+Accept: application/fhir+json
+
+
+{
+  "resourceType": "RelatedPerson",
+  "id": "{id}",   // Replace with actual ID from GET
+
+  "identifier": [
+    {
+      "system": "http://example.org/relatedperson-id",
+      "value": "RP-001"
+    }
+  ],
+
+  "active": true,
+
+  "patient": {
+    "reference": "Patient/123",
+    "display": "John Doe"
+  },
+
+  "relationship": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+          "code": "MTH",
+          "display": "Mother"
+        }
+      ],
+      "text": "Mother"
+    }
+  ],
+
+  "name": [
+    {
+      "use": "official",
+      "family": "Doe",
+      "given": ["Jane", "Maria"]
+    }
+  ],
+
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+40123999999",
+      "use": "mobile"
+    }
+  ],
+
+  "address": [
+    {
+      "use": "home",
+      "line": ["14 Health Street"],
+      "city": "Bucharest",
+      "postalCode": "020202",
+      "country": "RO"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+### Element: status for Immunization.reason
+PUT http://localhost:8080/fhir/Observation/{id}
+Content-Type: application/fhir+json
+Accept: application/fhir+json
+
+
+
+{
+  "resourceType": "Observation",
+
+  "status": "final",
+
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "clinical",
+          "display": "Clinical"
+        }
+      ]
+    }
+  ],
+
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "REASON_CODE",  // Replace with appropriate code for reason
+        "display": "Reason for Immunization"
+      }
+    ]
+  },
+
+  "subject": {
+    "reference": "Patient/{patient-id}"
+  },
+
+  "encounter": {
+    "reference": "Encounter/{encounter-id}"  // optional
+  },
+
+  "effectiveDateTime": "YYYY-MM-DDThh:mm:ss+TZ",
+
+  "valueString": "Patient has chronic condition X",  // Reason description
+
+  "derivedFrom": [
+    {
+      "reference": "Immunization/{immunization-id}"
+    }
+  ]
+}
+
+

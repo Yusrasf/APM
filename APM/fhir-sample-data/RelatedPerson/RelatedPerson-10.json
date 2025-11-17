@@ -1,0 +1,35 @@
+{
+  "resourceType": "RelatedPerson",
+  "id": "relatedperson-10",
+  "patient": {
+    "reference": "Patient/patient-10"
+  },
+  "relationship": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+          "code": "PRN",
+          "display": "Parent"
+        }
+      ],
+      "text": "Elternteil"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Lang",
+      "given": [
+        "Stefan"
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+43 5572 123456",
+      "use": "home"
+    }
+  ]
+}

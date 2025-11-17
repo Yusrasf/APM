@@ -1,0 +1,5 @@
+### DELETE specific Organization (Provider) by ID
+### Removes a specific provider organization from the FHIR server
+DELETE http://localhost:8080/fhir/Organization/{id}
+Accept: application/fhir+json
+

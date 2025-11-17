@@ -1,0 +1,16 @@
+{
+  "resourceType": "Organization",
+  "id": "clinic-2",
+  "name": "Kinderarztpraxis Graz",
+  "address": [
+    {
+      "type": "both",
+      "line": [
+        "Marktplatz 5"
+      ],
+      "city": "Graz",
+      "postalCode": "8010",
+      "country": "AT"
+    }
+  ]
+}

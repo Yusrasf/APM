@@ -1,0 +1,96 @@
+### POST Immunization
+### Creates a new Immunization record for a patient
+POST http://localhost:8080/fhir/Immunization
+Content-Type: application/fhir+json
+Accept: application/fhir+json
+
+{
+  "resourceType": "Immunization",
+
+  "basedOn": [
+    {
+      "reference": "ImmunizationRecommendation/12345",
+      "display": "Recommendation for Influenza Vaccine"
+    }
+  ],
+
+
+  "status": "completed",
+
+  "statusReason": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "IMMUNE",
+        "display": "Patient immune"
+      }
+    ]
+  },
+
+  "vaccineCode": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/sid/cvx",
+        "code": "140",
+        "display": "Influenza, seasonal, injectable"
+      }
+    ],
+    "text": "Influenza vaccine"
+  },
+
+  "patient": {
+    "reference": "Patient/123",
+    "display": "John Doe"
+  },
+
+  "encounter": {
+    "reference": "Encounter/456",
+    "display": "Routine vaccination visit"
+  },
+
+  "occurrenceDateTime": "2025-10-30T10:30:00+02:00",
+
+  "performer": [
+    {
+      "actor": {
+        "reference": "Practitioner/789",
+        "display": "Dr. Anna Smith"
+      }
+    }
+  ],
+
+  "reaction": [
+    {
+      "date": "2025-10-30T18:00:00+02:00",
+      "manifestation": [
+        {
+          "reference": "Observation/999",
+          "display": "Mild redness at injection site"
+        }
+      ]
+    }
+  ],
+
+  "protocolApplied": [
+    {
+      "series": "Influenza 2025 Series",
+      "authority": {
+        "reference": "Organization/555",
+        "display": "City Health Clinic"
+      },
+      "targetDisease": [
+        {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "6142004",
+              "display": "Influenza"
+            }
+          ]
+        }
+      ],
+      "doseNumberPositiveInt": 1,
+      "seriesDosesPositiveInt": 2
+    }
+  ]
+}

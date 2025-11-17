@@ -1,0 +1,52 @@
+### POST Organization for Immunization.manufacturer
+### Element: Organization for Immunization.manufacturer
+POST http://localhost:8080/fhir/Organization
+Content-Type: application/fhir+json
+Accept: application/fhir+json
+
+
+{
+  "resourceType": "Organization",
+  
+  "identifier": [
+    {
+      "system": "http://example.org/manufacturer-id",
+      "value": "manuf-001"
+    }
+  ],
+
+  "name": "Example Vaccine Manufacturer",
+
+  "type": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+          "code": "manufacturer",
+          "display": "Manufacturer"
+        }
+      ]
+    }
+  ],
+
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+1-555-555-5555"
+    },
+    {
+      "system": "email",
+      "value": "info@example.org"
+    }
+  ],
+
+  "address": [
+    {
+      "line": ["123 Vaccine St."],
+      "city": "Cityname",
+      "state": "Statename",
+      "postalCode": "12345",
+      "country": "Country"
+    }
+  ]
+}

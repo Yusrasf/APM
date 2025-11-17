@@ -1,0 +1,53 @@
+### Element: identifier for Immunization.provider (the hospital/clinic’s unique ID)
+PUT http://localhost:8080/fhir/Organization/{id}
+Content-Type: application/fhir+json
+Accept: application/fhir+json
+
+
+
+{
+  "resourceType": "Organization",
+
+  "identifier": [
+    {
+      "system": "http://example.org/hospital-id",
+      "value": "hospital-001"
+    }
+  ],
+
+  "name": "City Health Clinic",
+
+  "type": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+          "code": "prov",
+          "display": "Healthcare Provider"
+        }
+      ]
+    }
+  ],
+
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+1-555-111-2222"
+    },
+    {
+      "system": "email",
+      "value": "contact@cityhealthclinic.org"
+    }
+  ],
+
+  "address": [
+    {
+      "line": ["456 Wellness Ave."],
+      "city": "Healthville",
+      "state": "HealthyState",
+      "postalCode": "12345",
+      "country": "Country"
+    }
+  ]
+}
+

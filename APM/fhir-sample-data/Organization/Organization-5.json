@@ -1,0 +1,16 @@
+{
+  "resourceType": "Organization",
+  "id": "clinic-5",
+  "name": "Kinderarztpraxis Innsbruck",
+  "address": [
+    {
+      "type": "both",
+      "line": [
+        "Maria-Theresien-Straße 10"
+      ],
+      "city": "Innsbruck",
+      "postalCode": "6020",
+      "country": "AT"
+    }
+  ]
+}

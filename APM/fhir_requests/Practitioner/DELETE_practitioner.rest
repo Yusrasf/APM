@@ -1,0 +1,5 @@
+### DELETE Practitioner
+### Deletes a Practitioner record by ID
+DELETE http://localhost:8080/fhir/Practitioner/{id}
+Accept: application/fhir+json
+

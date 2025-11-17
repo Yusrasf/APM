@@ -1,0 +1,20 @@
+### GET All Practitioners
+### Retrieves all Practitioner resources
+GET http://localhost:8080/fhir/Practitioner
+Accept: application/fhir+json
+
+### GET Practitioner by ID
+### Retrieves one Practitioner resource by ID
+GET http://localhost:8080/fhir/Practitioner/{id}
+Accept: application/fhir+json
+
+### GET Practitioner by Identifier
+### Searches Practitioner by their registry or internal ID
+GET http://localhost:8080/fhir/Practitioner?identifier=http://example.org/practitioner-id|PRAC-001
+Accept: application/fhir+json
+
+### GET Practitioner by Given Name
+### Retrieves Practitioners with given name “Anna”
+GET http://localhost:8080/fhir/Practitioner?given=Anna
+Accept: application/fhir+json
+

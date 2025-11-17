@@ -1,0 +1,8 @@
+### GET all Observations for Immunization.reason
+GET http://localhost:8080/fhir/Observation?code=REASON_CODE&patient={patient-id}
+Accept: application/fhir+json
+
+### GET a specific Observation by ID
+GET http://localhost:8080/fhir/Observation/{id}
+Accept: application/fhir+json
+

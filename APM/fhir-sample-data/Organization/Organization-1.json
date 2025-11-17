@@ -1,0 +1,16 @@
+{
+  "resourceType": "Organization",
+  "id": "clinic-1",
+  "name": "Kinderarztpraxis Wien",
+  "address": [
+    {
+      "type": "both",
+      "line": [
+        "Hauptstraße 12"
+      ],
+      "city": "Wien",
+      "postalCode": "1010",
+      "country": "AT"
+    }
+  ]
+}

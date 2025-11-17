@@ -1,0 +1,48 @@
+### PUT Practitioner
+### Updates an existing Practitioner record (replaces the entire resource)
+PUT http://localhost:8080/fhir/Practitioner/{id}
+Content-Type: application/fhir+json
+Accept: application/fhir+json
+
+
+{
+  "resourceType": "Practitioner",
+  "id": "{id}",   // Replace with actual Practitioner ID
+
+  "identifier": [
+    {
+      "system": "http://example.org/practitioner-id",
+      "value": "PRAC-001"
+    }
+  ],
+
+  "name": [
+    {
+      "use": "official",
+      "family": "Smith",
+      "given": ["Anna"],
+      "prefix": ["Dr."]
+    }
+  ],
+
+  "gender": "female",
+  "birthDate": "1980-09-12",
+
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+40123123456",
+      "use": "work"
+    }
+  ],
+
+  "address": [
+    {
+      "use": "work",
+      "line": ["67 Medical Street"],
+      "city": "Cluj-Napoca",
+      "postalCode": "400001",
+      "country": "RO"
+    }
+  ]
+}

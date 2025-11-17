@@ -1,0 +1,8 @@
+### GET all Organization_manufacturer
+GET http://localhost:8080/fhir/Organization
+Accept: application/fhir+json
+
+### GET a specific Organization_manufacturer by ID
+GET http://localhost:8080/fhir/Organization/{id}
+Accept: application/fhir+json
+

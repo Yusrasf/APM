@@ -1,0 +1,35 @@
+{
+  "resourceType": "RelatedPerson",
+  "id": "relatedperson-1",
+  "patient": {
+    "reference": "Patient/1"
+  },
+  "relationship": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+          "code": "PRN",
+          "display": "Parent"
+        }
+      ],
+      "text": "Elternteil"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Müller",
+      "given": [
+        "Anna"
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+43 123 456789",
+      "use": "home"
+    }
+  ]
+}

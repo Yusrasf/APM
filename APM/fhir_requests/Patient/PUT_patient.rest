@@ -1,0 +1,51 @@
+### PUT Patient
+### Updates an existing Patient record (replaces the entire resource)
+PUT http://localhost:8080/fhir/Patient/{id}
+Content-Type: application/fhir+json
+Accept: application/fhir+json
+
+
+{
+  "resourceType": "Patient",
+  "id": "{id}",   // Replace with actual patient ID
+
+  "identifier": [
+    {
+      "system": "http://example.org/national-id",
+      "value": "123456789"
+    }
+  ],
+
+  "name": [
+    {
+      "use": "official",
+      "family": "Doe",
+      "given": ["John"]
+    }
+  ],
+
+  "gender": "male",
+  "birthDate": "1990-05-15",
+
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+40123123123",
+      "use": "mobile"
+    },
+    {
+      "system": "email",
+      "value": "john.doe@example.org"
+    }
+  ],
+
+  "address": [
+    {
+      "use": "home",
+      "line": ["456 Health Avenue"],
+      "city": "Cluj-Napoca",
+      "postalCode": "400001",
+      "country": "RO"
+    }
+  ]
+}

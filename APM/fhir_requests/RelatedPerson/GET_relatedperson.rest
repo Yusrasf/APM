@@ -1,0 +1,25 @@
+### GET All RelatedPersons
+### Retrieves all RelatedPerson resources
+GET http://localhost:8080/fhir/RelatedPerson
+Accept: application/fhir+json
+
+
+### GET RelatedPerson by ID
+### Retrieves one RelatedPerson by its unique ID
+GET http://localhost:8080/fhir/RelatedPerson/{id}
+Accept: application/fhir+json
+
+### GET RelatedPerson by Identifier
+### Finds RelatedPerson with specific identifier value
+GET http://localhost:8080/fhir/RelatedPerson?identifier=http://example.org/relatedperson-id|RP-001
+Accept: application/fhir+json
+
+### GET RelatedPerson by Relationship Type
+### Finds all RelatedPersons with relationship “Mother”
+GET http://localhost:8080/fhir/RelatedPerson?relationship=MTH
+Accept: application/fhir+json
+
+### GET RelatedPersons by City
+### Searches by address city
+GET http://localhost:8080/fhir/RelatedPerson?address-city=Wien
+Accept: application/fhir+json
