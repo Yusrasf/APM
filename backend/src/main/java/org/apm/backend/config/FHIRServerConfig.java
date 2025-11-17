@@ -3,7 +3,7 @@ package org.apm.backend.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import jakarta.servlet.annotation.WebServlet;
-import org.apm.backend.fhir.PatientResourceProvider; ///replace, add
+import org.apm.backend.fhir.provider.PatientResourceProvider; ///replace, add
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

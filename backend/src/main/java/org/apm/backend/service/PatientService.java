@@ -4,7 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.r5.model.Patient;
 import org.apm.backend.dto.patient.CreatePatientRequestDto;
 import org.apm.backend.dto.patient.PatientSummaryDto;
-import org.apm.backend.fhir.PatientResourceProvider;
+import org.apm.backend.fhir.provider.PatientResourceProvider;
 import org.apm.backend.mapper.PatientMapper;
 import org.springframework.stereotype.Service;
 
