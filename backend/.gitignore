@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+# Ignore specific patient mapper file
+backend/src/main/java/org/apm/backend/mapper/PatientMapper.java

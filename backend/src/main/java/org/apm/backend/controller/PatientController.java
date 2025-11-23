@@ -38,8 +38,8 @@ public class PatientController {
     }
 
 
-    @GetMapping("/search")
-    public PatientSummaryDto searchByIdentifier(@RequestParam String identifier) {
-        return patientService.searchByIdentifier(identifier);
-    }
+   // @GetMapping("/search")
+    //public PatientSummaryDto searchByIdentifier(@RequestParam String identifier) {
+      //  return patientService.searchByIdentifier(identifier);
+    //}
 }

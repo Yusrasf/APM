@@ -28,13 +28,13 @@ public class PatientService {
         return patientMapper.toPatientSummaryDto(patient);
     }
 
-    public PatientSummaryDto searchByIdentifier(String identifier) {
-        return patientResourceProvider.searchByIdentifier(new ca.uhn.fhir.rest.param.TokenParam(identifier))
-                .stream()
-                .findFirst()
-                .map(patientMapper::toPatientSummaryDto)
-                .orElse(null);
-    }
+   // public PatientSummaryDto searchByIdentifier(String identifier) {
+     //   return patientResourceProvider.searchByIdentifier(new ca.uhn.fhir.rest.param.TokenParam(identifier))
+       //         .stream()
+         //       .findFirst()
+           //     .map(patientMapper::toPatientSummaryDto)
+             //   .orElse(null);
+    //}
     public PatientSummaryDto getPatientSummary(String id) {
         return getPatientById(id);
     }
