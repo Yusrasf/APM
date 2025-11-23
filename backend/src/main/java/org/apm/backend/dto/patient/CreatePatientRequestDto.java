@@ -23,7 +23,7 @@ public class CreatePatientRequestDto {
         return birthDate;
     }
 
-    public String getrelatedPersonIdentifier() {
+    public String getRelatedPersonIdentifier() {
         return relatedPersonIdentifier;
     }
     /// Setters

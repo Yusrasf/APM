@@ -10,21 +10,45 @@ import org.springframework.stereotype.Component;
 public class PatientMapper {
     public Patient toFHIR(CreatePatientRequestDto dto) {
         Patient patient = new Patient();
-        patient.addIdentifier().setValue(dto.getIdentifier());
+        if (dto.getIdentifier() != null) {
+            patient.addIdentifier().setValue(dto.getIdentifier());
+        }
         patient.addName()
                 .setFamily(dto.getLastName())
                 .addGiven(dto.getFirstName());
-        patient.setBirthDateElement(new DateType(dto.getBirthDate()));
-        /// mother identifier???
-        patient.addLink().setValue(dto.getrelate);
+        if (dto.getBirthDate() != null) {
+            patient.setBirthDateElement(new DateType(dto.getBirthDate()));
+        }
+        /// mother identifier??
+        // Optionally store related person identifier as a second identifier
+        if (dto.getRelatedPersonIdentifier() != null
+                && !dto.getRelatedPersonIdentifier().isBlank()) {
+            patient.addIdentifier()
+                    .setSystem("http://example.org/fhir/related-person-identifier")
+                    .setValue(dto.getRelatedPersonIdentifier());
+        }
+
         return patient;
     }
     public PatientSummaryDto toPatientSummaryDto(Patient patient) {
         PatientSummaryDto dto = new PatientSummaryDto();
-        dto.setId(patient.getIdElement().getIdPart());
-        dto.setFullName(patient.getNameFirstRep().getNameAsSingleString());
-        dto.setBirthDate(patient.getBirthDateElement().asStringValue());
-        dto.setIdentifier(patient.getIdentifierFirstRep().getValue());
+
+        if (patient.getIdElement() != null) {
+            dto.setId(patient.getIdElement().getIdPart());
+        }
+
+        if (patient.hasName()) {
+            dto.setFullName(patient.getNameFirstRep().getNameAsSingleString());
+        }
+
+        if (patient.hasBirthDate()) {
+            dto.setBirthDate(patient.getBirthDateElement().asStringValue());
+        }
+
+        if (patient.hasIdentifier()) {
+            dto.setIdentifier(patient.getIdentifierFirstRep().getValue());
+        }
+
         return dto;
     }
 
