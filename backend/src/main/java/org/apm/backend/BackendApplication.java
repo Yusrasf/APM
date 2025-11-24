@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 
-// Исключаем класс, который генерирует пароль по умолчанию
+
 @SpringBootApplication(exclude = {UserDetailsServiceAutoConfiguration.class})
 @ServletComponentScan
 public class BackendApplication {
