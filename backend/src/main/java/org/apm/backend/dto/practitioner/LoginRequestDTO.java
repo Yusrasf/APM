@@ -4,10 +4,6 @@ package org.apm.backend.dto.practitioner;
  */
 public class LoginRequestDTO {
 
-
-
-
-
     private String identifier; // SSN or other practitioner identifier
     private String password;
 

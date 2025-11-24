@@ -3,15 +3,20 @@ package org.apm.backend.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import jakarta.servlet.annotation.WebServlet;
-import org.apm.backend.fhir.provider.PatientResourceProvider; ///replace, add
+import org.apm.backend.fhir.provider.PatientResourceProvider;
+import org.apm.backend.fhir.provider.PractitionerResourceProvider; // <-- ДОБАВЛЕНО
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @WebServlet(urlPatterns = {"/fhir/*"}, displayName = "FHIR Server")
 @Component
 public class FHIRServerConfig extends RestfulServer{
+
     @Autowired
     private PatientResourceProvider patientResourceProvider;
+
+    @Autowired
+    private PractitionerResourceProvider practitionerResourceProvider;
 
 
     @Override
@@ -22,6 +27,7 @@ public class FHIRServerConfig extends RestfulServer{
 
         // Register resource providers
         registerProvider(patientResourceProvider);
+        registerProvider(practitionerResourceProvider);
 
 
         // Pretty JSON output
@@ -30,7 +36,6 @@ public class FHIRServerConfig extends RestfulServer{
         // (Optional) Turn off strict validation
         // getFhirContext().getRestfulClientFactory().setServerValidationMode(null);
 
-        System.out.println("DEBUG: FHIR server initialized!");
+        System.out.println("DEBUG: FHIR server initialized! Registered Providers: Patient, Practitioner");
     }
-
 }
