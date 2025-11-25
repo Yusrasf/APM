@@ -41,14 +41,12 @@ public class ObservationMapper {
 
         // value + unit (very simple handling)
         DataType value = obs.getValue();
-        if (value instanceof Quantity) {
-            Quantity quantity = (Quantity) value;
+        if (value instanceof Quantity quantity) {
             if (quantity.getValue() != null) {
                 dto.setValue(quantity.getValue().toPlainString());
             }
             dto.setUnit(quantity.getUnit());
-        } else if (value instanceof StringType) {
-            StringType st = (StringType) value;
+        } else if (value instanceof StringType st) {
             dto.setValue(st.getValue());
         }
 

@@ -3,8 +3,21 @@ package org.apm.backend.mapper;
 import org.apm.backend.dto.practitioner.EncounterBlockDTO;
 import org.apm.backend.dto.practitioner.ImmunizationBlockDTO;
 import org.apm.backend.dto.practitioner.PatientClinicalOverviewDTO;
-import org.apm.backend.mapper.*;
-import org.hl7.fhir.r5.model.*;
+import org.apm.backend.dto.practitioner.ImmunizationDTO;
+import org.apm.backend.dto.practitioner.PractitionerDTO;
+import org.apm.backend.dto.practitioner.ObservationDTO;
+import org.apm.backend.dto.practitioner.EncounterDTO;
+import org.apm.backend.dto.practitioner.LocationDTO;
+import org.apm.backend.dto.practitioner.OrganizationDTO;
+import org.apm.backend.dto.practitioner.PatientDetailsDTO;
+
+import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.Immunization;
+import org.hl7.fhir.r5.model.Location;
+import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.Organization;
+import org.hl7.fhir.r5.model.Patient;
+import org.hl7.fhir.r5.model.Practitioner;
 
 import org.springframework.stereotype.Component;
 
@@ -38,64 +51,86 @@ public class PatientOverviewAssembler {
         this.observationMapper = observationMapper;
     }
 
+    /**
+     * Build the big screen DTO from all FHIR resources.
+     *
+     * @param locationById            key: encounterId  -> Location
+     * @param orgById                 key: encounterId  -> Organization
+     * @param immByEncounterId        key: encounterId  -> list of Immunizations
+     * @param practitionerByImmId     key: immunizationId -> Practitioner
+     * @param obsByImmunizationId     key: immunizationId -> list of Observations
+     */
     public PatientClinicalOverviewDTO toOverview(
             Patient patient,
             List<Encounter> encounters,
             Map<String, Location> locationById,
             Map<String, Organization> orgById,
             Map<String, List<Immunization>> immByEncounterId,
-            Map<String, Practitioner> practitionerById,
-            Map<String, Medication> medicationById,
+            Map<String, Practitioner> practitionerByImmId,
             Map<String, List<Observation>> obsByImmunizationId) {
 
         PatientClinicalOverviewDTO dto = new PatientClinicalOverviewDTO();
 
         // patient box
-        dto.setPatient(patientMapper.toPatientDetailsDTO(patient));
+        PatientDetailsDTO patientDetails = patientMapper.toPatientDetailsDTO(patient);
+        dto.setPatient(patientDetails);
 
         // encounter blocks
         List<EncounterBlockDTO> encounterBlocks = encounters.stream()
                 .map(encounter -> {
                     EncounterBlockDTO block = new EncounterBlockDTO();
 
-                    block.setEncounter(encounterMapper.toEncounterDTO(encounter));
+                    // encounter
+                    EncounterDTO encounterDTO = encounterMapper.toEncounterDTO(encounter);
+                    block.setEncounter(encounterDTO);
 
                     String encounterId = encounter.getIdElement().getIdPart();
 
                     // location
                     Location loc = locationById.get(encounterId);
                     if (loc != null) {
-                        block.setLocation(locationMapper.toLocationDTO(loc));
+                        LocationDTO locDto = locationMapper.toLocationDTO(loc);
+                        block.setLocation(locDto);
                     }
 
                     // organization
                     Organization org = orgById.get(encounterId);
                     if (org != null) {
-                        block.setOrganization(organizationMapper.toOrganizationDTO(org));
+                        OrganizationDTO orgDto = organizationMapper.toOrganizationDTO(org);
+                        block.setOrganization(orgDto);
                     }
 
                     // immunizations in this encounter
-                    List<Immunization> imms = immByEncounterId.getOrDefault(encounterId, List.of());
+                    List<Immunization> imms =
+                            immByEncounterId.getOrDefault(encounterId, List.of());
+
                     List<ImmunizationBlockDTO> immBlocks = imms.stream()
                             .map(imm -> {
                                 ImmunizationBlockDTO ib = new ImmunizationBlockDTO();
-                                ib.setImmunization(immunizationMapper.toImmunizationDTO(imm));
 
-                                // practitioner
-                                Practitioner prac = /* find practitioner for this imm from practitionerById */;
+                                // immunization main data
+                                ImmunizationDTO immDto = immunizationMapper.toImmunizationDTO(imm);
+                                ib.setImmunization(immDto);
+
+                                String immId = imm.getIdElement().getIdPart();
+
+                                // practitioner (if provided in map)
+                                Practitioner prac = practitionerByImmId != null
+                                        ? practitionerByImmId.get(immId)
+                                        : null;
                                 if (prac != null) {
-                                    ib.setPractitioner(practitionerMapper.toPractitionerDTO(prac));
+                                    PractitionerDTO pracDto = practitionerMapper.toPractitionerDTO(prac);
+                                    ib.setPractitioner(pracDto);
                                 }
 
-                                // observations
+                                // observations for this immunization
                                 List<Observation> obsList =
-                                        obsByImmunizationId.getOrDefault(
-                                                imm.getIdElement().getIdPart(), List.of());
-                                ib.setObservations(
-                                        obsList.stream()
-                                                .map(observationMapper::toObservationDTO)
-                                                .toList()
-                                );
+                                        obsByImmunizationId.getOrDefault(immId, List.of());
+
+                                List<ObservationDTO> obsDtos = obsList.stream()
+                                        .map(observationMapper::toObservationDTO)
+                                        .toList();
+                                ib.setObservations(obsDtos);
 
                                 return ib;
                             })
