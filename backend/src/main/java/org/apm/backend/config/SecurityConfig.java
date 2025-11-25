@@ -2,7 +2,6 @@ package org.apm.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -18,15 +17,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // FHIR server open
                         .requestMatchers("/fhir/**").permitAll()
-                        // everything else must be authenticated
-                        .anyRequest().authenticated()
+                        // allow your JSON login endpoint for everyone
+                        .requestMatchers("/api/auth/login").permitAll()
+                        // (for now) everything else also allowed - easier while developing
+                        .anyRequest().permitAll()
                 )
 
-                // ✅ enable default Spring login page at /login
-                .formLogin(Customizer.withDefaults())
-
-                // (optional) enable logout at /logout
-                .logout(Customizer.withDefaults());
+                // ❌ we do NOT want Spring's own /login HTML now
+                .formLogin(form -> form.disable())
+                .httpBasic(httpBasic -> httpBasic.disable());
 
         return http.build();
     }
