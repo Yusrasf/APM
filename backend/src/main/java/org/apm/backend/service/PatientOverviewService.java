@@ -23,7 +23,6 @@ public class PatientOverviewService {
     private final IGenericClient fhirClient;
     private final PatientOverviewAssembler overviewAssembler;
 
-    // small mappers for the simple endpoints
     private final PatientMapper patientMapper;
     private final EncounterMapper encounterMapper;
     private final ImmunizationMapper immunizationMapper;
@@ -33,6 +32,7 @@ public class PatientOverviewService {
                                   PatientMapper patientMapper,
                                   EncounterMapper encounterMapper,
                                   ImmunizationMapper immunizationMapper) {
+
         this.fhirClient = fhirClient;
         this.overviewAssembler = overviewAssembler;
         this.patientMapper = patientMapper;
@@ -40,15 +40,14 @@ public class PatientOverviewService {
         this.immunizationMapper = immunizationMapper;
     }
 
-    // -------------------------------------------------------------------------
-    // 1) searchPatientsByIdentifier  (used by /patients/searchByIdentifier)
-    // -------------------------------------------------------------------------
+    // ------------------------------------------------------------
+    // 1) Search patients by identifier
+    // ------------------------------------------------------------
     public List<PatientDetailsDTO> searchPatientsByIdentifier(String identifier) {
 
         Bundle bundle = fhirClient
                 .search()
                 .forResource(Patient.class)
-                // search by Patient.identifier value
                 .where(new TokenClientParam("identifier").exactly().code(identifier))
                 .returnBundle(Bundle.class)
                 .execute();
@@ -59,15 +58,14 @@ public class PatientOverviewService {
                 .collect(Collectors.toList());
     }
 
-    // -------------------------------------------------------------------------
-    // 2) getEncountersForPatient  (used by /patients/{patientId}/encounters)
-    // -------------------------------------------------------------------------
+    // ------------------------------------------------------------
+    // 2) Encounters for patient
+    // ------------------------------------------------------------
     public List<EncounterDTO> getEncountersForPatient(String patientId) {
 
         Bundle encBundle = fhirClient
                 .search()
                 .forResource(Encounter.class)
-                // subject = Patient/{patientId}
                 .where(new ReferenceClientParam("subject").hasId(patientId))
                 .returnBundle(Bundle.class)
                 .execute();
@@ -78,43 +76,64 @@ public class PatientOverviewService {
                 .collect(Collectors.toList());
     }
 
-    // -------------------------------------------------------------------------
-    // 3) getImmunizationsForEncounter (used by /encounters/{encounterId}/immunizations)
-    // -------------------------------------------------------------------------
+    // ------------------------------------------------------------
+    // 3) Immunizations for encounter
+    // ------------------------------------------------------------
     public List<ImmunizationDTO> getImmunizationsForEncounter(String encounterId) {
 
+        // MUST LOAD BY PATIENT THEN FILTER — encounter is NOT a search param in R5
+
+        // Extract patient ID from encounterId manually not possible, backend endpoint already passes encounterId
+        // So load encounter to get patient
+        Encounter encounter = fhirClient
+                .read()
+                .resource(Encounter.class)
+                .withId(encounterId)
+                .execute();
+
+        String patientId = encounter.getSubject().getReferenceElement().getIdPart();
+
+        // Search ALL immunizations for the patient
         Bundle immBundle = fhirClient
                 .search()
                 .forResource(Immunization.class)
-                // encounter = Encounter/{encounterId}
-                .where(new ReferenceClientParam("encounter").hasId(encounterId))
+                .where(new ReferenceClientParam("patient").hasId(patientId))
                 .returnBundle(Bundle.class)
                 .execute();
 
-        return immBundle.getEntry().stream()
+        List<Immunization> allImms = immBundle.getEntry().stream()
                 .map(e -> (Immunization) e.getResource())
+                .collect(Collectors.toList());
+
+        // Filter only immunizations belonging to THIS encounter
+        List<Immunization> belonging = allImms.stream()
+                .filter(i -> i.hasEncounter()
+                        && i.getEncounter().getReferenceElement().hasIdPart()
+                        && i.getEncounter().getReferenceElement().getIdPart().equals(encounterId))
+                .collect(Collectors.toList());
+
+        return belonging.stream()
                 .map(immunizationMapper::toImmunizationDTO)
                 .collect(Collectors.toList());
     }
 
-    // -------------------------------------------------------------------------
-    // 4) getClinicalOverview (used by /patients/{patientId}/clinical-overview)
-    // -------------------------------------------------------------------------
+    // ------------------------------------------------------------
+    // 4) Clinical overview
+    // ------------------------------------------------------------
     public PatientClinicalOverviewDTO getClinicalOverview(String patientId) {
         return buildOverviewForPatient(patientId);
     }
 
-    // ===== internal helper: this is the big logic we wrote earlier ==========
     private PatientClinicalOverviewDTO buildOverviewForPatient(String patientId) {
 
-        // 1) Load Patient
+        // Load patient
         Patient patient = fhirClient
                 .read()
                 .resource(Patient.class)
                 .withId(patientId)
                 .execute();
 
-        // 2) Load Encounters for this Patient: subject=Patient/{id}
+        // Load encounters
         Bundle encBundle = fhirClient
                 .search()
                 .forResource(Encounter.class)
@@ -126,25 +145,36 @@ public class PatientOverviewService {
                 .map(e -> (Encounter) e.getResource())
                 .collect(Collectors.toList());
 
+        // Load ALL immunizations for patient once
+        Bundle immBundle = fhirClient
+                .search()
+                .forResource(Immunization.class)
+                .where(new ReferenceClientParam("patient").hasId(patientId))
+                .returnBundle(Bundle.class)
+                .execute();
+
+        List<Immunization> allImmunizations = immBundle.getEntry().stream()
+                .map(e -> (Immunization) e.getResource())
+                .collect(Collectors.toList());
+
+        // Maps
         Map<String, Location> locationByEncounterId = new HashMap<>();
         Map<String, Organization> orgByEncounterId = new HashMap<>();
         Map<String, List<Immunization>> immByEncounterId = new HashMap<>();
         Map<String, Practitioner> practitionerByImmId = new HashMap<>();
         Map<String, List<Observation>> obsByImmunizationId = new HashMap<>();
 
-        // 3) For each encounter, load related resources
+        // Process encounters
         for (Encounter enc : encounters) {
+
             String encId = enc.getIdElement().getIdPart();
 
-            // --- Location from Encounter.location[0].location ---
+            // --- Location ---
             if (enc.hasLocation()
                     && enc.getLocationFirstRep().hasLocation()
                     && enc.getLocationFirstRep().getLocation().getReferenceElement().hasIdPart()) {
 
-                String locId = enc.getLocationFirstRep()
-                        .getLocation()
-                        .getReferenceElement()
-                        .getIdPart();
+                String locId = enc.getLocationFirstRep().getLocation().getReferenceElement().getIdPart();
 
                 Location loc = fhirClient
                         .read()
@@ -155,13 +185,11 @@ public class PatientOverviewService {
                 locationByEncounterId.put(encId, loc);
             }
 
-            // --- Organization from Encounter.serviceProvider ---
+            // --- Organization ---
             if (enc.hasServiceProvider()
                     && enc.getServiceProvider().getReferenceElement().hasIdPart()) {
 
-                String orgId = enc.getServiceProvider()
-                        .getReferenceElement()
-                        .getIdPart();
+                String orgId = enc.getServiceProvider().getReferenceElement().getIdPart();
 
                 Organization org = fhirClient
                         .read()
@@ -172,25 +200,21 @@ public class PatientOverviewService {
                 orgByEncounterId.put(encId, org);
             }
 
-            // --- Immunizations in this encounter: encounter=Encounter/{encId} ---
-            Bundle immBundle = fhirClient
-                    .search()
-                    .forResource(Immunization.class)
-                    .where(new ReferenceClientParam("encounter").hasId(encId))
-                    .returnBundle(Bundle.class)
-                    .execute();
-
-            List<Immunization> imms = immBundle.getEntry().stream()
-                    .map(e -> (Immunization) e.getResource())
+            // --- Immunizations for this encounter (FILTER) ---
+            List<Immunization> imms = allImmunizations.stream()
+                    .filter(i -> i.hasEncounter()
+                            && i.getEncounter().getReferenceElement().hasIdPart()
+                            && i.getEncounter().getReferenceElement().getIdPart().equals(encId))
                     .collect(Collectors.toList());
 
             immByEncounterId.put(encId, imms);
 
-            // For each immunization: practitioner + observations
+            // Practitioner + Observations
             for (Immunization imm : imms) {
+
                 String immId = imm.getIdElement().getIdPart();
 
-                // Practitioner from Immunization.performer[0].actor
+                // Practitioner
                 if (imm.hasPerformer()
                         && imm.getPerformerFirstRep().hasActor()
                         && imm.getPerformerFirstRep().getActor().getReferenceElement().hasIdPart()) {
@@ -209,24 +233,25 @@ public class PatientOverviewService {
                     practitionerByImmId.put(immId, prac);
                 }
 
-                // Observations linked to this immunization via focus=Immunization/{id}
+                // Observations (R5 does NOT support focus search → filter manually)
                 Bundle obsBundle = fhirClient
                         .search()
                         .forResource(Observation.class)
-                        .where(new ReferenceClientParam("focus")
-                                .hasId("Immunization/" + immId))
+                        .where(new ReferenceClientParam("subject").hasId(patientId))
                         .returnBundle(Bundle.class)
                         .execute();
 
-                List<Observation> obsList = obsBundle.getEntry().stream()
+                List<Observation> obsFiltered = obsBundle.getEntry().stream()
                         .map(e -> (Observation) e.getResource())
+                        .filter(o -> o.getFocus().stream().anyMatch(ref ->
+                                ref.getReferenceElement().hasIdPart()
+                                        && ref.getReferenceElement().getIdPart().equals(immId)))
                         .collect(Collectors.toList());
 
-                obsByImmunizationId.put(immId, obsList);
+                obsByImmunizationId.put(immId, obsFiltered);
             }
         }
 
-        // 4) Assemble DTO
         return overviewAssembler.toOverview(
                 patient,
                 encounters,
