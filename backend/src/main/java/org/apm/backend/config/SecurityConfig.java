@@ -23,7 +23,6 @@ public class SecurityConfig {
                         .anyRequest().permitAll()
                 )
 
-                // ❌ we do NOT want Spring's own /login HTML now
                 .formLogin(form -> form.disable())
                 .httpBasic(httpBasic -> httpBasic.disable());
 
