@@ -24,6 +24,19 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Assembles the full {@link PatientClinicalOverviewDTO} from FHIR resources.
+ * This component combines:
+ * <ul>
+ *     <li>Patient</li>
+ *     <li>Encounters</li>
+ *     <li>Locations &amp; Organizations per encounter</li>
+ *     <li>Immunizations per encounter</li>
+ *     <li>Practitioner and Observations per immunization</li>
+ * </ul>
+ * into the hierarchical DTO structure used by the practitioner UI.
+ */
+
 @Component
 public class PatientOverviewAssembler {
 
