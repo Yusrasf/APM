@@ -16,8 +16,8 @@ public class FhirClientConfig {
 
     @Bean
     public IGenericClient fhirClient(FhirContext fhirContext) {
-        // Use the port where your app runs: 8081 or 8080
-        String baseUrl = "http://localhost:8081/fhir";
+
+        String baseUrl = "http://localhost:8080/fhir";
         return fhirContext.newRestfulGenericClient(baseUrl);
     }
 }
