@@ -10,9 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Handles all authentication endpoints, such as login and token refreshing.
- */
+
+/// Handles all authentication endpoints, such as login and token refreshing.
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
