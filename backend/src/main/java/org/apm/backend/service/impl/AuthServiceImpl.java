@@ -1,12 +1,19 @@
-package org.apm.backend.service;
+package org.apm.backend.service.impl;
 
 import org.apm.backend.auth.CredentialStore;
 import org.apm.backend.auth.PractitionerCredential;
 import org.apm.backend.dto.practitioner.LoginRequestDTO;
 import org.apm.backend.dto.practitioner.LoginResponseDTO;
 import org.apm.backend.dto.practitioner.PractitionerHeaderDTO;
+import org.apm.backend.service.AuthService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Authentication service implementation for practitioner login.
+ * Uses {@link CredentialStore} (JSON-based credentials) to validate
+ * identifier + password and returns a {@link LoginResponseDTO}.
+ **/
 
 @Service
 public class AuthServiceImpl implements AuthService {
