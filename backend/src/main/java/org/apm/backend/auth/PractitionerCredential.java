@@ -1,9 +1,17 @@
 package org.apm.backend.auth;
 
+/**
+ * Simple in-memory credential model for a practitioner.
+ *
+ * This class is used by {@link CredentialStore} to deserialize entries from
+ * <code>practitioner-credentials.json</code> using Jackson. Each instance
+ * represents one practitioner's login credentials (identifier + password).
+ */
+
 public class PractitionerCredential {
 
-    private String identifier;
-    private String password;   // <--- IMPORTANT: must be "password"
+    private String identifier; ///Unique login identifier for the practitioner
+    private String password;  ///Plain-text password used ONLY for development
 
     public PractitionerCredential() {
     }
@@ -14,12 +22,16 @@ public class PractitionerCredential {
     }
 
     public String getIdentifier() {
-        return identifier;
+        return identifier; /// Returns the practitioner's unique identifier
     }
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
     }
+    /**
+     * Sets the practitioner's password.
+     * Called by Jackson when mapping the JSON field "password".
+     */
 
     public String getPassword() {   // <--- AuthServiceImpl calls this
         return password;
