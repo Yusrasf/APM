@@ -1,31 +1,52 @@
 package org.apm.backend.mapper;
 
+import org.apm.backend.dto.practitioner.PatientDetailsDTO;
+import org.hl7.fhir.r5.model.HumanName;
+import org.hl7.fhir.r5.model.Identifier;
 import org.hl7.fhir.r5.model.Patient;
-import org.hl7.fhir.r5.model.DateType;
-import org.apm.backend.dto.patient.CreatePatientRequestDto;
-import org.apm.backend.dto.patient.PatientSummaryDto;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PatientMapper {
-    public Patient toFHIR(CreatePatientRequestDto dto) {
-        Patient patient = new Patient();
-        patient.addIdentifier().setValue(dto.getIdentifier());
-        patient.addName()
-                .setFamily(dto.getLastName())
-                .addGiven(dto.getFirstName());
-        patient.setBirthDateElement(new DateType(dto.getBirthDate()));
-        /// mother identifier???
-        patient.addLink().setValue(dto.getrelate);
-        return patient;
-    }
-    public PatientSummaryDto toPatientSummaryDto(Patient patient) {
-        PatientSummaryDto dto = new PatientSummaryDto();
-        dto.setId(patient.getIdElement().getIdPart());
-        dto.setFullName(patient.getNameFirstRep().getNameAsSingleString());
-        dto.setBirthDate(patient.getBirthDateElement().asStringValue());
-        dto.setIdentifier(patient.getIdentifierFirstRep().getValue());
+    /// PATIENT USER SIDE
+
+
+
+    /// PRACTITIONER USER SIDE
+    /// 1) Patient -> PatientDetailsDTO (clinical overview header for Practitioner)
+    public PatientDetailsDTO toPatientDetailsDTO(Patient patient) {
+        if (patient == null) {
+            return null;
+        }
+
+        PatientDetailsDTO dto = new PatientDetailsDTO();
+
+        /// Patient Technical FHIR id (Patient.id)
+        if (patient.getIdElement() != null) {
+            dto.setPatientId(patient.getIdElement().getIdPart());
+        }
+        /// Patient Business identifier (Austrian social security number)
+        if (patient.hasIdentifier()) {
+            Identifier identifier = patient.getIdentifierFirstRep();
+            dto.setPatientIdentifier(identifier.getValue());
+        }
+
+        /// Patient Name (firstName + lastName)
+        if (!patient.getName().isEmpty()) {
+            HumanName name = patient.getNameFirstRep();
+            dto.setFirstName(name.getGivenAsSingleString());
+            dto.setLastName(name.getFamily());
+        }
+        /// Patient Birth date
+        if (patient.hasBirthDate()) {
+            dto.setBirthDate(patient.getBirthDateElement().getValueAsString());
+        }
+        /// Patient Gender
+        if (patient.getGender() != null) {
+            dto.setGender(patient.getGender().toCode()); // "male", "female", "other", "unknown"
+        }
         return dto;
     }
+
 
 }

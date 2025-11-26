@@ -1,45 +1,59 @@
 package org.apm.backend.controller;
 
-
-import org.apm.backend.dto.patient.CreatePatientRequestDto;
-import org.apm.backend.dto.patient.PatientSummaryDto;
-import org.apm.backend.service.PatientService;
+import org.apm.backend.dto.practitioner.EncounterDTO;
+import org.apm.backend.dto.practitioner.ImmunizationDTO;
+import org.apm.backend.dto.practitioner.PatientClinicalOverviewDTO;
+import org.apm.backend.dto.practitioner.PatientDetailsDTO;
+import org.apm.backend.service.PatientOverviewService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/patient")
+@RequestMapping("/api/patients")
 public class PatientController {
 
+    private final PatientOverviewService patientOverviewService;
 
-    private final PatientService patientService;
-
-
-    public PatientController(PatientService patientService) {
-        this.patientService = patientService;
+    public PatientController(PatientOverviewService patientOverviewService) {
+        this.patientOverviewService = patientOverviewService;
     }
-
-
-    @PostMapping("/create")
-    public PatientSummaryDto createPatient(@RequestBody CreatePatientRequestDto dto) {
-        return patientService.createPatient(dto);
-    }
-
-
-    @GetMapping("/{id}")
-    public PatientSummaryDto getPatient(@PathVariable String id) {
-        return patientService.getPatientById(id);
-    }
-
-
-    @GetMapping("/{id}/summary")
-    public PatientSummaryDto getSummary(@PathVariable String id) {
-        return patientService.getPatientSummary(id);
-    }
-
 
     @GetMapping("/search")
-    public PatientSummaryDto searchByIdentifier(@RequestParam String identifier) {
-        return patientService.searchByIdentifier(identifier);
+    public ResponseEntity<List<PatientDetailsDTO>> searchByIdentifier(
+            @RequestParam("identifier") String identifier) {
+
+        List<PatientDetailsDTO> patients =
+                patientOverviewService.searchPatientsByIdentifier(identifier);
+        return ResponseEntity.ok(patients);
+    }
+
+    @GetMapping("/{patientId}/encounters")
+    public ResponseEntity<List<EncounterDTO>> getEncountersForPatient(
+            @PathVariable String patientId) {
+
+        List<EncounterDTO> encounters =
+                patientOverviewService.getEncountersForPatient(patientId);
+        return ResponseEntity.ok(encounters);
+    }
+
+    @GetMapping("/{patientId}/encounters/{encounterId}/immunizations")
+    public ResponseEntity<List<ImmunizationDTO>> getImmunizationsForEncounter(
+            @PathVariable String patientId,
+            @PathVariable String encounterId) {
+
+        List<ImmunizationDTO> imms =
+                patientOverviewService.getImmunizationsForEncounter(encounterId);
+        return ResponseEntity.ok(imms);
+    }
+
+    @GetMapping("/{patientId}/clinical-overview")
+    public ResponseEntity<PatientClinicalOverviewDTO> getClinicalOverview(
+            @PathVariable String patientId) {
+
+        PatientClinicalOverviewDTO overview =
+                patientOverviewService.getClinicalOverview(patientId);
+        return ResponseEntity.ok(overview);
     }
 }

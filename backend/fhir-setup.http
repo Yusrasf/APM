@@ -1,0 +1,177 @@
+### Create Patient
+PUT http://localhost:8080/fhir/Patient/test-patient-1
+Content-Type: application/fhir+json
+
+{
+  "resourceType": "Patient",
+  "id": "test-patient-1",
+  "identifier": [
+    {
+      "system": "http://example.org/austria/ssn",
+      "value": "1234567890"
+    }
+  ],
+  "name": [
+    {
+      "family": "Musterpatient",
+      "given": ["Anna"]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1990-01-01"
+}
+
+
+### Create Organization (hospital)
+PUT http://localhost:8080/fhir/Organization/test-org-1
+Content-Type: application/fhir+json
+
+{
+  "resourceType": "Organization",
+  "id": "test-org-1",
+  "name": "Vienna General Hospital"
+}
+
+
+### Create Location (with address)
+PUT http://localhost:8080/fhir/Location/test-location-1
+Content-Type: application/fhir+json
+
+{
+  "resourceType": "Location",
+  "id": "test-location-1",
+  "name": "Vaccination Room 1",
+  "address": {
+    "line": ["Spitalgasse 23"],
+    "city": "Vienna",
+    "postalCode": "1090",
+    "country": "AT"
+  }
+}
+
+
+### Create Practitioner (doctor)
+PUT http://localhost:8080/fhir/Practitioner/test-practitioner-1
+Content-Type: application/fhir+json
+
+{
+  "resourceType": "Practitioner",
+  "id": "test-practitioner-1",
+  "identifier": [
+    {
+      "system": "http://example.org/doctor-id",
+      "value": "DOC123"
+    }
+  ],
+  "name": [
+    {
+      "family": "Hausarzt",
+      "given": ["Maria"]
+    }
+  ]
+}
+
+
+### Create Encounter (links patient + org + location)
+PUT http://localhost:8080/fhir/Encounter/test-encounter-1
+Content-Type: application/fhir+json
+
+{
+  "resourceType": "Encounter",
+  "id": "test-encounter-1",
+  "status": "finished",
+  "class": {
+    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+    "code": "AMB",
+    "display": "ambulatory"
+  },
+  "subject": {
+    "reference": "Patient/test-patient-1"
+  },
+  "serviceProvider": {
+    "reference": "Organization/test-org-1"
+  },
+  "location": [
+    {
+      "location": {
+        "reference": "Location/test-location-1"
+      }
+    }
+  ],
+  "actualPeriod": {
+    "start": "2024-11-01T10:00:00+02:00",
+    "end": "2024-11-01T10:30:00+02:00"
+  }
+}
+
+
+### Create Immunization (links patient + encounter + practitioner)
+PUT http://localhost:8080/fhir/Immunization/test-immunization-1
+Content-Type: application/fhir+json
+
+{
+  "resourceType": "Immunization",
+  "id": "test-immunization-1",
+  "status": "completed",
+  "vaccineCode": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/sid/cvx",
+        "code": "207",
+        "display": "COVID-19 mRNA vaccine"
+      }
+    ],
+    "text": "COVID-19 mRNA vaccine"
+  },
+  "patient": {
+    "reference": "Patient/test-patient-1"
+  },
+  "encounter": {
+    "reference": "Encounter/test-encounter-1"
+  },
+  "occurrenceDateTime": "2024-11-01T10:05:00+02:00",
+  "lotNumber": "LOT123",
+  "performer": [
+    {
+      "actor": {
+        "reference": "Practitioner/test-practitioner-1"
+      }
+    }
+  ]
+}
+
+
+### Create Observation (temperature focusing on the immunization)
+PUT http://localhost:8080/fhir/Observation/test-observation-1
+Content-Type: application/fhir+json
+
+{
+  "resourceType": "Observation",
+  "id": "test-observation-1",
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "8310-5",
+        "display": "Body temperature"
+      }
+    ],
+    "text": "Body temperature"
+  },
+  "subject": {
+    "reference": "Patient/test-patient-1"
+  },
+  "effectiveDateTime": "2024-11-01T10:10:00+02:00",
+  "valueQuantity": {
+    "value": 37.5,
+    "unit": "°C",
+    "system": "http://unitsofmeasure.org",
+    "code": "Cel"
+  },
+  "focus": [
+    {
+      "reference": "Immunization/test-immunization-1"
+    }
+  ]
+}
