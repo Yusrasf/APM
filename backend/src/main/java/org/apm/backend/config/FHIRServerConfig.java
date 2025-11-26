@@ -1,48 +1,34 @@
 package org.apm.backend.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import jakarta.servlet.annotation.WebServlet;
-import org.apm.backend.fhir.provider.PatientResourceProvider; ///replace, add
+import org.apm.backend.fhir.provider.PractitionerResourceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @WebServlet(urlPatterns = {"/fhir/*"}, displayName = "FHIR Server")
 @Component
-public class FHIRServerConfig extends RestfulServer{
-    @Autowired
-    private PatientResourceProvider patientResourceProvider;
+public class FHIRServerConfig extends RestfulServer {
 
+    private final PractitionerResourceProvider practitionerResourceProvider;
+
+    @Autowired
+    public FHIRServerConfig(PractitionerResourceProvider practitionerResourceProvider) {
+        this.practitionerResourceProvider = practitionerResourceProvider;
+    }
 
     @Override
     protected void initialize() {
-
-        // Select FHIR version
+        // Use FHIR R5
         setFhirContext(FhirContext.forR5());
 
-        // Register resource providers
-        registerProvider(patientResourceProvider);
+        // Register your Practitioner provider
+        registerProvider(practitionerResourceProvider);
 
-
-        // Pretty JSON output
+        // Pretty JSON in responses
         setDefaultPrettyPrint(true);
 
-@Configuration
-public class FHIRServerConfig {
-
-    @Bean
-    public FhirContext fhirContext() {
-        // R5 context
-        return FhirContext.forR5();
-    }
-
-    @Bean
-    public IGenericClient fhirClient(FhirContext fhirContext) {
-        // TODO: change to the URL of your HAPI FHIR server
-        String baseUrl = "http://localhost:8080/fhir";
-        return fhirContext.newRestfulGenericClient(baseUrl);
+        System.out.println("DEBUG: FHIR server initialized! Registered Providers: Practitioner");
     }
 }
