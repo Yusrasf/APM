@@ -10,11 +10,19 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller exposing patient-related endpoints for practitioners.
+ * All endpoints delegate to {@link PatientOverviewService}, which retrieves
+ * patient, encounter and immunization data from the FHIR server.
+ */
+
 @RestController
 @RequestMapping("/api/patients")
 public class PatientController {
 
     private final PatientOverviewService patientOverviewService;
+
+    /// Constructor-based injection of the patient overview service
 
     public PatientController(PatientOverviewService patientOverviewService) {
         this.patientOverviewService = patientOverviewService;
