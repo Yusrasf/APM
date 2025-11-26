@@ -5,17 +5,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
-import org.springframework.boot.web.servlet.ServletComponentScan;
 
 @SpringBootApplication(
         exclude = {
                 DataSourceAutoConfiguration.class,
-                HibernateJpaAutoConfiguration.class
+                HibernateJpaAutoConfiguration.class,
+                UserDetailsServiceAutoConfiguration.class
         }
 )
-
-@SpringBootApplication(exclude = {UserDetailsServiceAutoConfiguration.class})
-@ServletComponentScan
 public class BackendApplication {
 
     public static void main(String[] args) {
