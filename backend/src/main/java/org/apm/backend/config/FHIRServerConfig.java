@@ -20,13 +20,13 @@ public class FHIRServerConfig extends RestfulServer {
 
     @Override
     protected void initialize() {
-        // Use FHIR R5
+        /// Use FHIR R5
         setFhirContext(FhirContext.forR5());
 
-        // Register your Practitioner provider
+        /// Register thr Practitioner provider
         registerProvider(practitionerResourceProvider);
 
-        // Pretty JSON in responses
+        /// JSON in responses
         setDefaultPrettyPrint(true);
 
         System.out.println("DEBUG: FHIR server initialized! Registered Providers: Practitioner");
