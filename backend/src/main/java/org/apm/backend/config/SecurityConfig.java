@@ -1,39 +1,87 @@
 package org.apm.backend.config;
 
+import org.apm.backend.auth.CredentialStore;
+import org.apm.backend.auth.PractitionerCredential;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-/**
- * Basic Spring Security configuration for the backend.
- *
- * Opens the FHIR endpoints and the JSON login endpoint, and disables
- * default form login / HTTP Basic while in development.
- */
+import java.util.List;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
-    /// Defines the main Spring Security filter chain.
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
+    /**
+     * UserDetailsService that reads users from practitioner-credentials.json
+     * via CredentialStore.
+     *
+     * Username == "identifier" field from JSON.
+     * Password == "password" field from JSON (stored in plain text for DEV).
+     */
+    @Bean
+    public UserDetailsService userDetailsService(CredentialStore credentialStore) {
+        return username -> {
+            PractitionerCredential cred = credentialStore
+                    .findByIdentifier(username)
+                    .orElseThrow(() ->
+                            new UsernameNotFoundException("No practitioner with identifier " + username));
+
+            // IMPORTANT: {noop} => no encoding (because passwords in JSON are plain text)
+            return User.withUsername(cred.getIdentifier())
+                    .password("{noop}" + cred.getPassword())
+                    .roles("PRACTITIONER")
+                    .build();
+        };
+    }
+
+    // ===== CORS CONFIG used by Spring Security =================================
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        // Your Vite dev origin(s)
+        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
+    // ===== SECURITY FILTER CHAIN ===============================================
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                /// Configure which requests are allowed without authentication.
                 .authorizeHttpRequests(auth -> auth
-                        /// FHIR server open
-                        .requestMatchers("/fhir/**").permitAll()
-                        /// allow your JSON login endpoint for everyone
-                        .requestMatchers("/api/auth/login").permitAll()
-                        /// (for now) everything else also allowed - easier while developing
+                        // Allow preflight requests
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // Login endpoint is public
+                        .requestMatchers("/api/auth/**").permitAll()
+                        // Practitioner endpoints require PRACTITIONER role
+                        .requestMatchers("/api/practitioner/**").hasRole("PRACTITIONER")
+                        // Everything else is open for now
                         .anyRequest().permitAll()
                 )
-                /// Disable Spring's default HTML form login (/login)
-                .formLogin(form -> form.disable())
-                /// Disable HTTP Basic auth (no browser username/password dialog).
-                .httpBasic(httpBasic -> httpBasic.disable());
+
+                // HTTP Basic for practitioner endpoints
+                .httpBasic(Customizer.withDefaults())
+                .formLogin(form -> form.disable());
 
         return http.build();
     }
