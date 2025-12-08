@@ -15,7 +15,7 @@ public class ImmunizationDTO {
 
     private String occurrenceDateTime; /// When the dose was given
     private String status;             /// completed | entered-in-error | not-done | etc.
-    private String lotNumber;          /// Vaccine lot/batch number (optional)
+
 
     /// --- getters & setters ---
 
@@ -83,11 +83,5 @@ public class ImmunizationDTO {
         this.status = status;
     }
 
-    public String getLotNumber() {
-        return lotNumber;
-    }
 
-    public void setLotNumber(String lotNumber) {
-        this.lotNumber = lotNumber;
-    }
 }
