@@ -1,6 +1,7 @@
 package org.apm.backend.dto.practitioner;
 
 import java.util.List;
+
 /**
  * DTO representing one Encounter block in the Patient Clinical Overview.
  *
@@ -15,7 +16,8 @@ public class EncounterBlockDTO {
     private EncounterDTO encounter;
     private LocationDTO location;                       /// from Immunization.location
     private OrganizationDTO organization;               /// from Immunization.performer
-    private List<ImmunizationBlockDTO> immunizations;   /// all immunizations in this encounter
+    private List<ImmunizationBlockDTO> immunizations;
+    private List<ObservationDTO> observations;          /// all observations in this encounter
 
     public EncounterDTO getEncounter() {
         return encounter;
@@ -47,5 +49,25 @@ public class EncounterBlockDTO {
 
     public void setImmunizations(List<ImmunizationBlockDTO> immunizations) {
         this.immunizations = immunizations;
+    }
+
+    public List<ObservationDTO> getObservations() {
+        return observations;
+    }
+
+    public void setObservations(List<ObservationDTO> observations) {
+        this.observations = observations;
+    }
+
+    // ---- toString override (useful for logging/debugging) ----
+    @Override
+    public String toString() {
+        return "EncounterBlockDTO{" +
+                "encounter=" + encounter +
+                ", location=" + location +
+                ", organization=" + organization +
+                ", immunizations=" + immunizations +
+                ", observations=" + observations +
+                '}';
     }
 }
