@@ -9,10 +9,11 @@ public class EncounterDTO {
     /// --- Main info you show in UI ---
     private String status;        // planned | in-progress | finished |
 
-    private String reasonCode;    // optional: first reason code
+  //private String reasonCode;    // optional: first reason code
     private String reasonDisplay; // e.g. "Immunization visit"
 
     private String startDateTime; // encounter.period.start as String
+    private String endDateTime;
 
 
     /// --- getters and setters ---
@@ -41,7 +42,7 @@ public class EncounterDTO {
     }
     /// Encounter reason
 
-    public String getReasonCode() {
+    /** public String getReasonCode() {
         return reasonCode;
     }
 
@@ -56,6 +57,7 @@ public class EncounterDTO {
     public void setReasonDisplay(String reasonDisplay) {
         this.reasonDisplay = reasonDisplay;
     }
+*/
 
     /// Encounter date
     public String getStartDateTime() {
@@ -64,6 +66,14 @@ public class EncounterDTO {
 
     public void setStartDateTime(String startDateTime) {
         this.startDateTime = startDateTime;
+    }
+
+    public String getEndDateTime() {
+        return endDateTime;
+    }
+
+    public void setEndDateTime(String endDateTime) {
+        this.endDateTime = endDateTime;
     }
 
 }
