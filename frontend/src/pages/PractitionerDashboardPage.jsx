@@ -1,93 +1,72 @@
-import React, { useEffect, useState } from "react";
-import { practitionerApi } from "../api/practitionerApi";
-import { getAuth, logout } from "../api/authApi";
+// src/pages/PractitionerDashboardPage.jsx
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { fetchMyPatients } from "../api/practitionerApi";
 
-function PractitionerDashboardPage() {
-    const navigate = useNavigate();
+export default function PractitionerDashboardPage() {
     const [patients, setPatients] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+
+    const navigate = useNavigate();
+    const practitioner = JSON.parse(localStorage.getItem("practitioner"));
 
     useEffect(() => {
-        const auth = getAuth();
-        if (!auth) {
-            navigate("/");
-            return;
-        }
+        fetchMyPatients()
+            .then(setPatients)
+            .finally(() => setLoading(false));
+    }, []);
 
-        async function loadPatients() {
-            try {
-                setLoading(true);
-                const res = await practitionerApi.getMyPatients();
-                setPatients(res.data);
-            } catch (err) {
-                console.error(err);
-                setError("Failed to load patients.");
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        loadPatients();
-    }, [navigate]);
-
-    const handleLogout = () => {
-        logout();
-        navigate("/");
+    const logout = () => {
+        localStorage.clear();
+        navigate("/login");
     };
 
-    if (loading) return <div style={{ padding: "2rem" }}>Loading...</div>;
+    const goToPatient = (id) => navigate(`/practitioner/patients/${id}`);
 
     return (
-        <div style={{ padding: "2rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <h2>My Patients</h2>
-                <button onClick={handleLogout}>Logout</button>
-            </div>
+        <div style={{ padding: 32 }}>
+            <header style={{ display: "flex", justifyContent: "space-between" }}>
+                <div>
+                    <h1>Practitioner Dashboard</h1>
+                    {practitioner && (
+                        <p>
+                            Welcome <strong>{practitioner.fullName}</strong> ·{" "}
+                            {practitioner.organizationName}
+                        </p>
+                    )}
+                </div>
 
-            {error && (
-                <div style={{ color: "#b00020", marginBottom: "1rem" }}>{error}</div>
-            )}
+                <button onClick={logout}>Logout</button>
+            </header>
 
-            <table
-                style={{
-                    borderCollapse: "collapse",
-                    width: "100%",
-                    marginTop: "1rem",
-                }}
-            >
-                <thead>
-                <tr>
-                    <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>
-                        ID
-                    </th>
-                    <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>
-                        Name
-                    </th>
-                    <th style={{ borderBottom: "1px solid #ccc", padding: "0.5rem" }}>
-                        Birth date
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                {patients.map((p) => (
-                    <tr key={p.patientId}>
-                        <td style={{ borderBottom: "1px solid #eee", padding: "0.5rem" }}>
-                            {p.patientId}
-                        </td>
-                        <td style={{ borderBottom: "1px solid #eee", padding: "0.5rem" }}>
-                            {p.firstName} {p.lastName}
-                        </td>
-                        <td style={{ borderBottom: "1px solid #eee", padding: "0.5rem" }}>
-                            {p.birthDate}
-                        </td>
+            <h2>My Patients</h2>
+
+            {loading ? (
+                <p>Loading…</p>
+            ) : (
+                <table style={{ width: "100%", marginTop: 16 }}>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Birth date</th>
                     </tr>
-                ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    {patients.map((p) => (
+                        <tr
+                            key={p.patientId}
+                            style={{ cursor: "pointer" }}
+                            onClick={() => goToPatient(p.patientId)}
+                        >
+                            <td>{p.patientId}</td>
+                            <td>{p.firstName} {p.lastName}</td>
+                            <td>{p.birthDate}</td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            )}
         </div>
     );
 }
-
-export default PractitionerDashboardPage;

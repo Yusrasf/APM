@@ -7,7 +7,6 @@ import org.apm.backend.dto.practitioner.LoginResponseDTO;
 import org.apm.backend.dto.practitioner.PractitionerHeaderDTO;
 import org.apm.backend.service.AuthService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Authentication service implementation for practitioner login.
@@ -25,7 +24,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public LoginResponseDTO authenticate(LoginRequestDTO request) {
 
         System.out.println("DEBUG: Login attempt identifier=" + request.getIdentifier());

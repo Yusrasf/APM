@@ -1,14 +1,20 @@
-import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import LoginPage from "./pages/LoginPage.jsx";
-import PractitionerDashboardPage from "./pages/PractitionerDashboardPage.jsx";
+// src/App.jsx
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import PractitionerPatientsPage from "./pages/PractitionerPatientsPage";
+import PatientDetailPage from "./pages/PatientDetailPage";
 
 function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<LoginPage />} />
-                <Route path="/practitioner" element={<PractitionerDashboardPage />} />
+                <Route path="/" element={<Navigate to="/login" />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/practitioner" element={<PractitionerPatientsPage />} />
+                <Route
+                    path="/practitioner/patients/:patientId"
+                    element={<PatientDetailPage />}
+                />
             </Routes>
         </BrowserRouter>
     );

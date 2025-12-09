@@ -1,21 +1,29 @@
 package org.apm.backend.dto.practitioner;
 
-/**
- * DTO used to display basic Location information
- */
 public class LocationDTO {
 
-    private String locationId; /// FHIR Location.id (technical id)
-    private String name; /// Display name of the location
-    private String addressLine;
+    private String locationId;
+    private String organizationId;
+    private String name;
+    private String address;
+    private String description;
 
-    /// --- getters & setters ---
+    // --- getters & setters ---
+
     public String getLocationId() {
         return locationId;
     }
 
     public void setLocationId(String locationId) {
         this.locationId = locationId;
+    }
+
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
     }
 
     public String getName() {
@@ -26,12 +34,23 @@ public class LocationDTO {
         this.name = name;
     }
 
-    public String getAddressLine() {
-        return addressLine;
+    public String getAddress() {
+        return address;
     }
 
-    public void setAddressLine(String addressLine) {
-        this.addressLine = addressLine;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setAddressLine(String value) {
+
+    }
 }

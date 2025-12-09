@@ -59,6 +59,7 @@ function LoginPage() {
 
     const handlePractitionerLogin = async (e) => {
         e.preventDefault();
+
         if (!identifier || !password) {
             setError("Please enter identifier and password.");
             return;
@@ -67,8 +68,20 @@ function LoginPage() {
         try {
             setError("");
             setLoading(true);
-            await login(identifier, password);
+
+            const response = await login(identifier, password);
+
+            // ⭐ FIX: store Basic Auth token for all backend requests
+            const basic = btoa(identifier + ":" + password);
+            localStorage.setItem("basicToken", basic);
+
+            // Optional: store JWT if backend returns it
+            if (response?.accessToken) {
+                localStorage.setItem("accessToken", response.accessToken);
+            }
+
             navigate("/practitioner");
+
         } catch (err) {
             console.error(err);
             setError(
@@ -80,16 +93,17 @@ function LoginPage() {
         }
     };
 
+
     return (
         <div style={containerStyle}>
             <div style={leftStyle}>
                 <div style={cardStyle}>
                     <h1>Vaccination Tracking System</h1>
                     <p style={{ marginBottom: "2rem", color: "#555" }}>
-                        Parents can view their children's vaccination history and upcoming
+                        Patients can view their immunizations history and the upcoming immunization recommendations,
                         appointments.
                     </p>
-                    <h2>Parent login</h2>
+                    <h2>Pacient login</h2>
                     <p style={{ fontSize: "0.9rem", color: "#666" }}>
                         To be implemented later. Use the practitioner login on the right to
                         test the system.
@@ -99,7 +113,7 @@ function LoginPage() {
 
             <div style={rightStyle}>
                 <div style={cardStyle}>
-                    <h2>Practitioner login</h2>
+                    <h2>Practitioner Login</h2>
                     <p style={{ marginBottom: "1.5rem", fontSize: "0.9rem", color: "#666" }}>
                         Use the credentials from <code>practitioner-credentials.json</code>.
                     </p>
@@ -112,7 +126,7 @@ function LoginPage() {
                             style={inputStyle}
                             value={identifier}
                             onChange={(e) => setIdentifier(e.target.value)}
-                            placeholder="dr.smith"
+                            placeholder="practitioner ID"
                         />
 
                         <label style={{ fontSize: "0.85rem", fontWeight: 600 }}>
