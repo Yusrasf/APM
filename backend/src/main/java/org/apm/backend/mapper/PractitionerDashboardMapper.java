@@ -207,4 +207,39 @@ public class PractitionerDashboardMapper {
 
         return dto;
     }
+
+    public AllergyIntoleranceDTO toAllergyIntoleranceDTO(AllergyIntolerance ai) {
+
+        AllergyIntoleranceDTO dto = new AllergyIntoleranceDTO();
+
+        dto.setAllergyId(ai.getIdElement().getIdPart());
+
+        if (ai.hasClinicalStatus()) {
+            dto.setClinicalStatus(ai.getClinicalStatus().getText());
+        }
+
+        if (ai.hasVerificationStatus()) {
+            dto.setVerificationStatus(ai.getVerificationStatus().getText());
+        }
+
+        if (ai.hasCode() && ai.getCode().hasCoding()) {
+            Coding c = ai.getCode().getCodingFirstRep();
+            dto.setCode(c.getCode());
+            dto.setDisplay(c.getDisplay());
+        }
+
+        if (ai.hasCriticality()) {
+            dto.setCriticality(ai.getCriticality().toCode());
+        }
+
+        if (ai.hasReaction() && !ai.getReaction().isEmpty()) {
+            var r = ai.getReactionFirstRep();
+            if (r.hasDescription()) {
+                dto.setReaction(r.getDescription());
+            }
+        }
+
+        return dto;
+    }
+
 }
