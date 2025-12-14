@@ -7,31 +7,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * What’s wired to what
+ * Practitioner dashboard REST API
  *
- * GET /api/practitioner/patients
- * → getMyPatients() → FHIR search for patients with this practitioner as generalPractitioner.
- *
- * GET /api/practitioner/patients/{id}/immunizations
- * → getImmunizationsForPatient() → FHIR search Immunization?patient={id}
- *
+ * GET  /api/practitioner/patients
+ * GET  /api/practitioner/patients/{id}/overview
+ * GET  /api/practitioner/patients/{id}/immunizations
  * POST /api/practitioner/patients/{id}/immunizations
- * → createImmunizationForPatient() → creates Immunization on FHIR server.
- *
- * GET /api/practitioner/patients/{id}/recommendations
- * → getRecommendationsForPatient()
- *
+ * GET  /api/practitioner/patients/{id}/recommendations
  * POST /api/practitioner/patients/{id}/recommendations
- * → createRecommendationForPatient()
- *
- * GET /api/practitioner/patients/{id}/appointments
- * → getAppointmentsForPatient()
- *
+ * GET  /api/practitioner/patients/{id}/appointments
  * POST /api/practitioner/appointments
- * → createAppointment()
- *
- * PUT /api/practitioner/appointments/{appointmentId}/status?status=booked
- * → updateAppointmentStatus()
+ * PUT  /api/practitioner/appointments/{appointmentId}/status
  */
 @RestController
 @RequestMapping("/api/practitioner")
@@ -42,28 +28,44 @@ public class PractitionerDashboardController {
     public PractitionerDashboardController(PractitionerDashboardService dashboardService) {
         this.dashboardService = dashboardService;
     }
-    // 1) PATIENT OVERVIEW
+
+    // ─────────────────────────────────────────────────────────
+    // 1) PATIENT OVERVIEW (encounters + immunizations + obs + allergies)
+    // ─────────────────────────────────────────────────────────
     @GetMapping("/patients/{patientId}/overview")
-    public PatientClinicalOverviewDTO getPatientOverview(@PathVariable String patientId) {
-        return dashboardService.getPatientClinicalOverview(patientId);
+    public PatientClinicalOverviewDTO getOverview(@PathVariable String patientId) {
+
+        PatientDetailsDTO patient = dashboardService.getPatientDetails(patientId);
+
+        List<EncounterBlockDTO> encounters =
+                dashboardService.getEncounterBlocksForPatient(patientId);
+
+        List<AllergyIntoleranceDTO> allergies =
+                dashboardService.getAllergiesForPatient(patientId);
+
+        return new PatientClinicalOverviewDTO(
+                patient,
+                encounters,
+                allergies
+        );
     }
+
     // ─────────────────────────────────────────────────────────
     // 2) PATIENT LIST FOR CURRENT PRACTITIONER
     // ─────────────────────────────────────────────────────────
-    //List all patients assigned to the logged-in practitioner
     @GetMapping("/patients")
     public List<PatientDetailsDTO> getMyPatients() {
         return dashboardService.getMyPatients();
     }
+
     // ─────────────────────────────────────────────────────────
-    // 3) immunizations
+    // 3) IMMUNIZATIONS
     // ─────────────────────────────────────────────────────────
-    //Get immunizations for a patient
     @GetMapping("/patients/{patientId}/immunizations")
     public List<ImmunizationDTO> getImmunizations(@PathVariable String patientId) {
         return dashboardService.getImmunizationsForPatient(patientId);
     }
-    // Create a new immunization for a patient
+
     @PostMapping("/patients/{patientId}/immunizations")
     public ImmunizationDTO createImmunization(
             @PathVariable String patientId,
@@ -71,15 +73,15 @@ public class PractitionerDashboardController {
     ) {
         return dashboardService.createImmunizationForPatient(patientId, request);
     }
+
     // ─────────────────────────────────────────────────────────
     // 4) IMMUNIZATION RECOMMENDATIONS
     // ─────────────────────────────────────────────────────────
-    // Get immunization recommendations for a patient
     @GetMapping("/patients/{patientId}/recommendations")
     public List<ImmunizationRecommendationDTO> getRecommendations(@PathVariable String patientId) {
         return dashboardService.getRecommendationsForPatient(patientId);
     }
-    // Create a new immunization recommendation for a patient
+
     @PostMapping("/patients/{patientId}/recommendations")
     public ImmunizationRecommendationDTO createRecommendation(
             @PathVariable String patientId,
@@ -87,22 +89,20 @@ public class PractitionerDashboardController {
     ) {
         return dashboardService.createRecommendationForPatient(patientId, request);
     }
+
     // ─────────────────────────────────────────────────────────
     // 5) APPOINTMENTS
     // ─────────────────────────────────────────────────────────
-    // Get appointments for a patient
     @GetMapping("/patients/{patientId}/appointments")
     public List<AppointmentDTO> getAppointments(@PathVariable String patientId) {
         return dashboardService.getAppointmentsForPatient(patientId);
     }
 
-    // Create appointment (practitioner side)
     @PostMapping("/appointments")
     public AppointmentDTO createAppointment(@RequestBody CreateAppointmentRequest request) {
         return dashboardService.createAppointment(request);
     }
 
-    // Update appointment status (e.g. confirm / cancel)
     @PutMapping("/appointments/{appointmentId}/status")
     public AppointmentDTO updateAppointmentStatus(
             @PathVariable String appointmentId,
