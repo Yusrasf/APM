@@ -53,7 +53,7 @@ function RegisterPractitionerPage() {
                 {error && <p style={{ color: "red" }}>{error}</p>}
                 {success && <p style={{ color: "green" }}>Account created</p>}
 
-                <button type="submit">Create account</button>
+                <button type="submit" className="navbar-btn navbar-btn-primary">Create account</button>
             </form>
         </div>
     );

@@ -158,11 +158,8 @@ function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            style={{
-                                ...buttonStyle,
-                                background: loading ? "#9ca3af" : "#2563eb",
-                                color: "#fff",
-                            }}
+                            className="navbar-btn"
+
                         >
                             {loading ? "Logging in..." : "Log in as practitioner"}
                         </button>
@@ -172,6 +169,8 @@ function LoginPage() {
                 <button
                     type="button"
                     onClick={() => navigate("/register-practitioner")}
+                    className="navbar-btn"
+
                 >
                     Create account
                 </button>
