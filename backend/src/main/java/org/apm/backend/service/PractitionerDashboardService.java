@@ -170,6 +170,165 @@ public class PractitionerDashboardService {
     // ─────────────────────────────────────────────────────────
     // ===== NEW METHODS FOR PRACTITIONER DASHBOARD =====
     // ─────────────────────────────────────────────────────────
+    public PatientDetailsDTO getPatientDetails(String patientId) {
+        Patient patient = fhirClient.read()
+                .resource(Patient.class)
+                .withId(patientId)
+                .execute();
+
+        return mapper.toPatientDetails(patient);
+    }
+
+    public List<EncounterBlockDTO> getEncounterBlocksForPatient(String patientId) {
+
+        List<EncounterBlockDTO> encounterBlocks = new ArrayList<>();
+
+        Bundle encBundle = fhirClient.search()
+                .forResource(Encounter.class)
+                .where(Encounter.SUBJECT.hasId(patientId))
+                .returnBundle(Bundle.class)
+                .execute();
+
+        for (Bundle.BundleEntryComponent encEntry : encBundle.getEntry()) {
+
+            Encounter encounter = (Encounter) encEntry.getResource();
+            EncounterBlockDTO block = new EncounterBlockDTO();
+            String encId = encounter.getIdElement().getIdPart();
+
+            // —— Encounter core data ——
+            block.setEncounter(mapper.toEncounter(encounter));
+
+            // —— Organization (serviceProvider) ——
+            if (encounter.hasServiceProvider() &&
+                    encounter.getServiceProvider().getReferenceElement().hasIdPart()) {
+
+                String orgId = encounter.getServiceProvider().getReferenceElement().getIdPart();
+
+                Organization org = fhirClient.read()
+                        .resource(Organization.class)
+                        .withId(orgId)
+                        .execute();
+
+                block.setOrganization(mapper.toOrganization(org));
+            }
+
+            // —— Location + managing organization ——
+            if (encounter.hasLocation() && !encounter.getLocation().isEmpty()) {
+
+                Reference locRef = encounter.getLocationFirstRep().getLocation();
+
+                if (locRef.getReferenceElement().hasIdPart()) {
+
+                    String locId = locRef.getReferenceElement().getIdPart();
+
+                    Location loc = fhirClient.read()
+                            .resource(Location.class)
+                            .withId(locId)
+                            .execute();
+
+                    Organization managingOrg = null;
+
+                    if (loc.hasManagingOrganization() &&
+                            loc.getManagingOrganization().getReferenceElement().hasIdPart()) {
+
+                        String locOrgId = loc.getManagingOrganization()
+                                .getReferenceElement()
+                                .getIdPart();
+
+                        managingOrg = fhirClient.read()
+                                .resource(Organization.class)
+                                .withId(locOrgId)
+                                .execute();
+                    }
+
+                    block.setLocation(mapper.toLocation(loc, managingOrg));
+                }
+            }
+
+            // —— Immunizations belonging to this encounter ——
+            List<ImmunizationBlockDTO> immBlocks = new ArrayList<>();
+
+            Bundle immBundle = fhirClient.search()
+                    .forResource(Immunization.class)
+                    .where(Immunization.PATIENT.hasId(patientId))
+                    .returnBundle(Bundle.class)
+                    .execute();
+
+            for (Bundle.BundleEntryComponent immEntry : immBundle.getEntry()) {
+
+                Immunization imm = (Immunization) immEntry.getResource();
+
+                if (!imm.hasEncounter() ||
+                        !imm.getEncounter().getReferenceElement().hasIdPart() ||
+                        !encId.equals(imm.getEncounter().getReferenceElement().getIdPart())) {
+                    continue;
+                }
+
+                ImmunizationBlockDTO immBlock = new ImmunizationBlockDTO();
+                immBlock.setImmunization(mapper.toImmunization(imm));
+
+                // Practitioner
+                PractitionerDTO pracDto = null;
+                if (imm.hasPerformer() && !imm.getPerformer().isEmpty()) {
+                    Reference actorRef = imm.getPerformerFirstRep().getActor();
+                    if (actorRef.getReferenceElement().hasIdPart()) {
+                        String pracId = actorRef.getReferenceElement().getIdPart();
+                        Practitioner practitioner = fhirClient.read()
+                                .resource(Practitioner.class)
+                                .withId(pracId)
+                                .execute();
+                        pracDto = mapper.toPractitioner(practitioner);
+                    }
+                }
+                immBlock.setPractitioner(pracDto);
+
+                immBlocks.add(immBlock);
+            }
+
+            block.setImmunizations(immBlocks);
+
+            // —— Observations for this encounter ——
+            List<ObservationDTO> obsDtos = new ArrayList<>();
+
+            Bundle obsBundle = fhirClient.search()
+                    .forResource(Observation.class)
+                    .where(Observation.ENCOUNTER.hasId(encId))
+                    .returnBundle(Bundle.class)
+                    .execute();
+
+            for (Bundle.BundleEntryComponent obsEntry : obsBundle.getEntry()) {
+                Observation obs = (Observation) obsEntry.getResource();
+                obsDtos.add(mapper.toObservation(obs, null));
+            }
+
+            block.setObservations(obsDtos);
+
+            encounterBlocks.add(block);
+        }
+
+        return encounterBlocks;
+    }
+
+    public List<AllergyIntoleranceDTO> getAllergiesForPatient(String patientId) {
+
+        Bundle bundle = fhirClient.search()
+                .forResource(AllergyIntolerance.class)
+                .where(AllergyIntolerance.PATIENT.hasId(patientId))
+                .returnBundle(Bundle.class)
+                .execute();
+
+        List<AllergyIntoleranceDTO> result = new ArrayList<>();
+
+        for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+            AllergyIntolerance ai = (AllergyIntolerance) entry.getResource();
+            result.add(mapper.toAllergyIntoleranceDTO(ai));
+        }
+
+        return result;
+    }
+
+
+
 
     /** Helper: current username from Spring Security (e.g. "dr.smith"). */
     private String getCurrentUsername() {
