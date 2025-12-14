@@ -116,13 +116,20 @@ function PatientDetailPage() {
     if (!overview) {
         return <div style={{ padding: "2rem" }}>Loading...</div>;
     }
+    if (!overview) {
+        return <div style={{ padding: "2rem" }}>Loading...</div>;
+    }
 
     const patient = overview.patient;
+
 
     return (
         <div style={{ padding: "2rem" }}>
             <h1>
-                {patient.fullName} ({patient.patientId})
+                {patient.firstName} {patient.lastName}
+                <span style={{ fontSize: "1rem", color: "#666", marginLeft: "0.5rem" }}>
+        (ID: {patient.patientId})
+    </span>
             </h1>
             <p>
                 <strong>Birth date:</strong> {patient.birthDate} &nbsp; | &nbsp;

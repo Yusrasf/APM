@@ -3,7 +3,7 @@ package org.apm.backend.controller;
 import org.apm.backend.dto.practitioner.*;
 import org.apm.backend.service.PractitionerDashboardService;
 import org.springframework.web.bind.annotation.*;
-
+import org.apm.backend.dto.practitioner.RegisterPatientRequestDTO;
 import java.util.List;
 
 /**
@@ -110,4 +110,10 @@ public class PractitionerDashboardController {
     ) {
         return dashboardService.updateAppointmentStatus(appointmentId, status);
     }
+    @PostMapping("/patients/register")
+    public PatientDetailsDTO registerPatient(@RequestBody RegisterPatientRequestDTO request) {
+       return dashboardService.registerPatient(request);
+   }
+
+
 }

@@ -1,53 +1,75 @@
 package org.apm.backend.service.impl;
 
-import org.apm.backend.auth.CredentialStore;
-import org.apm.backend.auth.PractitionerCredential;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import org.hl7.fhir.r5.model.*;
 import org.apm.backend.dto.practitioner.LoginRequestDTO;
 import org.apm.backend.dto.practitioner.LoginResponseDTO;
-import org.apm.backend.dto.practitioner.PractitionerHeaderDTO;
+import org.apm.backend.dto.practitioner.RegistrationRequestDTO;
 import org.apm.backend.service.AuthService;
 import org.springframework.stereotype.Service;
-
-/**
- * Authentication service implementation for practitioner login.
- * Uses {@link CredentialStore} (JSON-based credentials) to validate
- * identifier + password and returns a {@link LoginResponseDTO}.
- **/
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private final CredentialStore credentialStore;
+    private final IGenericClient fhirClient;
 
-    public AuthServiceImpl(CredentialStore credentialStore) {
-        this.credentialStore = credentialStore;
+    public AuthServiceImpl(IGenericClient fhirClient) {
+        this.fhirClient = fhirClient;
     }
 
     @Override
     public LoginResponseDTO authenticate(LoginRequestDTO request) {
+        // Your existing login logic
+        return new LoginResponseDTO();
+    }
 
-        System.out.println("DEBUG: Login attempt identifier=" + request.getIdentifier());
-
-        PractitionerCredential cred = credentialStore
-                .findByIdentifier(request.getIdentifier())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials (identifier not found)"));
-
-        // PLAIN PASSWORD COMPARISON FOR DEV
-        if (!cred.getPassword().equals(request.getPassword())) {
-            System.out.println("DEBUG: Password mismatch. Expected=" + cred.getPassword()
-                    + ", got=" + request.getPassword());
-            throw new RuntimeException("Invalid credentials (password mismatch)");
+    @Override
+    public void register(RegistrationRequestDTO request) {
+        if (request.getIdentifier() == null || request.getPassword() == null) {
+            throw new IllegalArgumentException("Identifier and password are required");
         }
 
-        // For now, hardcode some practitioner header info
-        PractitionerHeaderDTO practitionerDetails = new PractitionerHeaderDTO(
-                1L,
-                "Practitioner " + request.getIdentifier(),
-                "Demo Organization"
-        );
+        // 1. Check if practitioner already exists
+        Bundle bundle = fhirClient.search()
+                .forResource(Practitioner.class)
+                .where(Practitioner.IDENTIFIER.exactly().identifier(request.getIdentifier()))
+                .returnBundle(Bundle.class)
+                .execute();
 
-        String token = "dummy_token_for_" + request.getIdentifier();
+        if (bundle.hasEntry()) {
+            throw new IllegalArgumentException("Practitioner with this identifier already exists");
+        }
 
-        return new LoginResponseDTO(token, practitionerDetails);
+        // 2. Create Practitioner resource
+        Practitioner practitioner = new Practitioner();
+        practitioner.addIdentifier()
+                .setSystem("http://hospital.smarthealthit.org/practitioners")
+                .setValue(request.getIdentifier());
+
+        // Name
+        if (request.getFirstName() != null || request.getLastName() != null) {
+            HumanName name = practitioner.addName();
+            if (request.getFirstName() != null) {
+                name.addGiven(request.getFirstName());
+            }
+            if (request.getLastName() != null) {
+                name.setFamily(request.getLastName());
+            }
+        }
+
+        // Optional: store password in a custom extension (for demo)
+        if (request.getPassword() != null) {
+            practitioner.addExtension()
+                    .setUrl("http://example.org/extensions/password")
+                    .setValue(new StringType(request.getPassword()));
+        }
+
+        // 3. Save to FHIR server
+        MethodOutcome outcome = fhirClient.create()
+                .resource(practitioner)
+                .execute();
+
+        System.out.println("Registered practitioner with ID: " + outcome.getId().getIdPart());
     }
 }

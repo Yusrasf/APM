@@ -2,7 +2,8 @@ package org.apm.backend.service;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import org.hl7.fhir.r5.model.*;
+import
+        org.hl7.fhir.r5.model.*;
 import org.apm.backend.dto.practitioner.*;
 import org.apm.backend.mapper.PractitionerDashboardMapper;
 import org.springframework.security.core.Authentication;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -214,7 +216,45 @@ public class PractitionerDashboardService {
                 .map(this::toPatientSummaryDTO)
                 .collect(Collectors.toList());
     }
+    // ── REGISTER NEW PATIENT ────────────────────────────────────────
 
+    public PatientDetailsDTO registerPatient(RegisterPatientRequestDTO request) {
+        Practitioner practitioner = getCurrentPractitioner();
+        String practitionerId = practitioner.getIdElement().getIdPart();
+
+        Patient patient = new Patient();
+        //patient.setId(request.getIdentifier());
+
+      //  patient.addIdentifier()
+           //     .setSystem("http://hospital.smarthealthit.org/patients")
+             //   .setValue(request.getIdentifier());
+
+        patient.addName()
+                .addGiven(request.getFirstName())
+                .setFamily(request.getLastName());
+
+        if (request.getBirthDate() != null) {
+            patient.setBirthDate(Date.from(
+                    LocalDate.parse(request.getBirthDate())
+                            .atStartOfDay(ZoneId.systemDefault())
+                            .toInstant()
+            ));
+        }
+
+        if (request.getGender() != null) {
+            patient.setGender(Enumerations.AdministrativeGender.fromCode(request.getGender()));
+        }
+
+        patient.addGeneralPractitioner()
+                .setReference("Practitioner/" + practitionerId);
+
+        MethodOutcome outcome = fhirClient.create()
+                .resource(patient)
+                .execute();
+
+        Patient created = (Patient) outcome.getResource();
+        return toPatientSummaryDTO(created);
+    }
     private PatientDetailsDTO toPatientSummaryDTO(Patient patient) {
         PatientDetailsDTO dto = new PatientDetailsDTO();
         dto.setPatientId(patient.getIdElement().getIdPart());

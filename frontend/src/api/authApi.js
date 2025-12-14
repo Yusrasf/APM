@@ -40,3 +40,11 @@ export function logout() {
     localStorage.removeItem("practitioner");
     localStorage.removeItem("basicToken");
 }
+
+export const registerPractitioner = (identifier, password) => {
+    return axios.post(`${API_BASE_URL}/api/auth/register`, {
+        identifier,
+        password
+    });
+};
+
