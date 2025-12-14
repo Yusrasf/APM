@@ -1,34 +1,61 @@
-// src/api/practitionerApi.js
 import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8082";
 
 const api = axios.create({
     baseURL: API_BASE_URL,
+    timeout: 10000,
+    withCredentials: true,
 });
 
-// Attach Basic auth from localStorage
+// Request interceptor
 api.interceptors.request.use((config) => {
     const basicToken = localStorage.getItem("basicToken");
     if (basicToken) {
         config.headers.Authorization = `Basic ${basicToken}`;
     }
+
+    if (!config.headers['Content-Type']) {
+        config.headers['Content-Type'] = 'application/json';
+    }
+
     return config;
 });
 
+// Response interceptor for auth errors
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            localStorage.removeItem("basicToken");
+            window.location.href = "/login";
+        }
+        return Promise.reject(error);
+    }
+);
+
 // ---- PATIENTS -------------------------------------------------------------
-
-
 export const fetchMyPatients = async () => {
-    const res = await api.get("/api/practitioner/patients");
-    return res.data;
+    try {
+        const res = await api.get("/api/practitioner/patients");
+        return res.data;
+    } catch (error) {
+        console.error("Error fetching patients:", error);
+        throw error;
+    }
 };
 
 export const fetchPatientOverview = async (patientId) => {
-    const res = await api.get(`/api/practitioner/patients/${patientId}/overview`);
-    return res.data; // PatientClinicalOverviewDTO
+    try {
+        const res = await api.get(`/api/practitioner/patients/${patientId}/overview`);
+        return res.data;
+    } catch (error) {
+        console.error(`Error fetching overview for patient ${patientId}:`, error);
+        throw error;
+    }
 };
 
+// ... rest of your functions (keep the same but remove debug logs) ...
 // ---- IMMUNIZATIONS --------------------------------------------------------
 
 export const fetchImmunizations = async (patientId) => {
@@ -86,5 +113,10 @@ export const updateAppointmentStatus = async (appointmentId, status) => {
         null,
         { params: { status } }
     );
+    return res.data;
+};
+
+export const registerPatient = async (patientData) => {
+    const res = await api.post("/api/practitioner/patients/register", patientData);
     return res.data;
 };

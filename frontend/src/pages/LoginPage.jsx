@@ -75,6 +75,9 @@ function LoginPage() {
             const basic = btoa(identifier + ":" + password);
             localStorage.setItem("basicToken", basic);
 
+            // Store practitioner login name
+            localStorage.setItem("practitionerName", identifier);
+
             // Optional: store JWT if backend returns it
             if (response?.accessToken) {
                 localStorage.setItem("accessToken", response.accessToken);
@@ -165,7 +168,16 @@ function LoginPage() {
                         </button>
                     </form>
                 </div>
+
+                <button
+                    type="button"
+                    onClick={() => navigate("/register-practitioner")}
+                >
+                    Create account
+                </button>
             </div>
+
+
         </div>
     );
 }

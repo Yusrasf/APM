@@ -371,6 +371,45 @@ public class PractitionerDashboardService {
                 .map(this::toPatientSummaryDTO)
                 .collect(Collectors.toList());
     }
+    // ── REGISTER NEW PATIENT ────────────────────────────────────────
+
+    public PatientDetailsDTO registerPatient(RegisterPatientRequestDTO request) {
+        Practitioner practitioner = getCurrentPractitioner();
+        String practitionerId = practitioner.getIdElement().getIdPart();
+
+        Patient patient = new Patient();
+        //patient.setId(request.getIdentifier());
+
+      //  patient.addIdentifier()
+           //     .setSystem("http://hospital.smarthealthit.org/patients")
+             //   .setValue(request.getIdentifier());
+
+        patient.addName()
+                .addGiven(request.getFirstName())
+                .setFamily(request.getLastName());
+
+        if (request.getBirthDate() != null) {
+            patient.setBirthDate(Date.from(
+                    LocalDate.parse(request.getBirthDate())
+                            .atStartOfDay(ZoneId.systemDefault())
+                            .toInstant()
+            ));
+        }
+
+        if (request.getGender() != null) {
+            patient.setGender(Enumerations.AdministrativeGender.fromCode(request.getGender()));
+        }
+
+        patient.addGeneralPractitioner()
+                .setReference("Practitioner/" + practitionerId);
+
+        MethodOutcome outcome = fhirClient.create()
+                .resource(patient)
+                .execute();
+
+        Patient created = (Patient) outcome.getResource();
+        return toPatientSummaryDTO(created);
+    }
 
     private PatientDetailsDTO toPatientSummaryDTO(Patient patient) {
         PatientDetailsDTO dto = new PatientDetailsDTO();
