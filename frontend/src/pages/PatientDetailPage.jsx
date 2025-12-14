@@ -156,10 +156,99 @@ function PatientDetailPage() {
             {activeTab === "overview" && (
                 <div>
                     <h2>Clinical overview</h2>
-                    <p>
-                        Encounters: {overview.encounters?.length ?? 0} &nbsp; | &nbsp;
-                        Related persons: {overview.relatedPersons?.length ?? 0}
-                    </p>
+
+                    {/* ENCOUNTERS */}
+                    <div style={{ marginTop: "2rem" }}>
+                        <h3>Encounters</h3>
+
+                        {overview.encounters && overview.encounters.length > 0 ? (
+                            overview.encounters.map((enc) => (
+                                <div
+                                    key={enc.encounter.encounterId}
+                                    style={{
+                                        border: "1px solid #ddd",
+                                        padding: "1rem",
+                                        borderRadius: 8,
+                                        marginBottom: "1rem",
+                                        background: "#fafafa"
+                                    }}
+                                >
+                                    <p>
+                                        <strong>Encounter ID:</strong> {enc.encounter.encounterId} <br/>
+                                        <strong>Status:</strong> {enc.encounter.status}
+                                    </p>
+
+                                    {/* Location */}
+                                    {enc.location && (
+                                        <p>
+                                            <strong>Location:</strong> {enc.location.name} <br/>
+                                            <strong>Managing organization:</strong> {enc.organization?.name}
+                                        </p>
+                                    )}
+
+                                    {/* Immunizations */}
+                                    <div style={{ marginTop: "1rem" }}>
+                                        <strong>Immunizations:</strong>
+                                        {enc.immunizations && enc.immunizations.length > 0 ? (
+                                            <ul>
+                                                {enc.immunizations.map((imm) => (
+                                                    <li key={imm.immunization.immunizationId}>
+                                                        {imm.immunization.occurrenceDateTime} – {imm.immunization.vaccineDisplay}
+                                                        {imm.practitioner && (
+                                                            <> (by Dr. {imm.practitioner.firstName} {imm.practitioner.lastName})</>
+                                                        )}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p>No immunizations in this encounter.</p>
+                                        )}
+                                    </div>
+
+                                    {/* Observations */}
+                                    <div style={{ marginTop: "1rem" }}>
+                                        <strong>Observations:</strong>
+                                        {enc.observations && enc.observations.length > 0 ? (
+                                            <ul>
+                                                {enc.observations.map((obs) => (
+                                                    <li key={obs.observationId}>
+                                                        {obs.display}: {obs.value}
+                                                        {obs.unit && <> {obs.unit}</>}
+                                                        {" "}
+                                                        ({obs.effectiveDateTime})
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p>No observations for this encounter.</p>
+                                        )}
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p>No encounters available.</p>
+                        )}
+                    </div>
+
+                    {/* ALLERGIES */}
+                    <div style={{ marginTop: "1rem" }}>
+                        <h3>Allergies</h3>
+                        {overview.allergies && overview.allergies.length > 0 ? (
+                            <ul>
+                                {overview.allergies.map((a) => (
+                                    <li key={a.allergyId}>
+                                        <strong>{a.display}</strong>
+                                        {a.reaction && <> – reaction: {a.reaction}</>}
+                                        {a.criticality && <> – criticality: {a.criticality}</>}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p>No allergies recorded.</p>
+                        )}
+                    </div>
+
+
                 </div>
             )}
 
@@ -169,7 +258,7 @@ function PatientDetailPage() {
                     <ul>
                         {immunizations.map((imm) => (
                             <li key={imm.immunizationId}>
-                                {imm.occurrenceDateTime} – {imm.vaccineDisplay} ({imm.status})
+                                {imm.occurrenceDateTime} –  vaccine code CVX : {imm.vaccineCode} | {imm.vaccineDisplay} | status: ({imm.status}) | ID: {imm.immunizationId}
                             </li>
                         ))}
                     </ul>
@@ -177,7 +266,7 @@ function PatientDetailPage() {
                     <h3 style={{ marginTop: "1.5rem" }}>Add immunization</h3>
                     <form onSubmit={handleCreateImmunization}>
                         <div>
-                            <label>Vaccine code</label>
+                            <label>Vaccine code      </label>
                             <input
                                 value={immForm.vaccineCode}
                                 onChange={(e) =>
@@ -186,8 +275,11 @@ function PatientDetailPage() {
                                 required
                             />
                         </div>
+                        <p>
+
+                        </p>
                         <div>
-                            <label>Vaccine display</label>
+                            <label>Vaccine display    </label>
                             <input
                                 value={immForm.vaccineDisplay}
                                 onChange={(e) =>
@@ -196,8 +288,11 @@ function PatientDetailPage() {
                                 required
                             />
                         </div>
+                        <p>
+
+                        </p>
                         <div>
-                            <label>Date (YYYY-MM-DD)</label>
+                            <label>Date (dd.mm.yy) </label>
                             <input
                                 type="date"
                                 value={immForm.date}
@@ -206,15 +301,33 @@ function PatientDetailPage() {
                                 }
                             />
                         </div>
+                        <p>
+
+                        </p>
                         <div>
-                            <label>Lot number</label>
+                            <label>Status </label>
                             <input
-                                value={immForm.lotNumber}
+                                value={immForm.status}
                                 onChange={(e) =>
-                                    setImmForm({ ...immForm, lotNumber: e.target.value })
+                                    setImmForm({ ...immForm, status: e.target.value })
                                 }
                             />
                         </div>
+                        <p>
+
+                        </p>
+                        <div>
+                            <label>Immunization ID </label>
+                            <input
+                                value={immForm.immunizationId}
+                                onChange={(e) =>
+                                    setImmForm({ ...immForm, immunizationId: e.target.value })
+                                }
+                            />
+                        </div>
+                        <p>
+
+                        </p>
                         <button type="submit">Save immunization</button>
                     </form>
                 </div>
