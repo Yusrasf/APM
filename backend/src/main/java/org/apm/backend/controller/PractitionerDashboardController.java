@@ -110,4 +110,18 @@ public class PractitionerDashboardController {
     ) {
         return dashboardService.updateAppointmentStatus(appointmentId, status);
     }
+    // ─────────────────────────────────────────────────────────
+    // 6) ENCOUNTER
+    // ─────────────────────────────────────────────────────────
+
+    @PostMapping("/patients/{patientId}/encounters/full")
+    public String createFullEncounter(
+            @PathVariable String patientId,
+            @RequestBody CreateFullEncounterRequest request) {
+
+        dashboardService.createFullEncounter(patientId, request);
+        return "OK";
+    }
+
+
 }

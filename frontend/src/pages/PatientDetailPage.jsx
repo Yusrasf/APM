@@ -4,13 +4,14 @@ import { useParams } from "react-router-dom";
 import {
     fetchPatientOverview,
     fetchImmunizations,
-    createImmunization,
     fetchRecommendations,
     createRecommendation,
     fetchAppointments,
     createAppointment,
     updateAppointmentStatus,
 } from "../api/practitionerApi";
+
+import FHIRAdminPanel from "../components/FHIRAdminPanel";
 
 function PatientDetailPage() {
     const { patientId } = useParams();
@@ -20,14 +21,6 @@ function PatientDetailPage() {
     const [recommendations, setRecommendations] = useState([]);
     const [appointments, setAppointments] = useState([]);
     const [activeTab, setActiveTab] = useState("overview");
-
-    // simple form state
-    const [immForm, setImmForm] = useState({
-        vaccineCode: "",
-        vaccineDisplay: "",
-        date: "",
-        lotNumber: "",
-    });
 
     const [recForm, setRecForm] = useState({
         vaccineCode: "",
@@ -46,27 +39,15 @@ function PatientDetailPage() {
     });
 
     useEffect(() => {
-        // load all blocks for this patient
         fetchPatientOverview(patientId).then(setOverview).catch(console.error);
         fetchImmunizations(patientId).then(setImmunizations).catch(console.error);
-        fetchRecommendations(patientId)
-            .then(setRecommendations)
-            .catch(console.error);
+        fetchRecommendations(patientId).then(setRecommendations).catch(console.error);
         fetchAppointments(patientId).then(setAppointments).catch(console.error);
     }, [patientId]);
 
-    const handleCreateImmunization = async (e) => {
-        e.preventDefault();
-        const payload = {
-            vaccineCode: immForm.vaccineCode,
-            vaccineDisplay: immForm.vaccineDisplay,
-            lotNumber: immForm.lotNumber || null,
-            date: immForm.date || null, // LocalDate string "2025-01-01"
-        };
-        const created = await createImmunization(patientId, payload);
-        setImmunizations((prev) => [...prev, created]);
-        setImmForm({ vaccineCode: "", vaccineDisplay: "", date: "", lotNumber: "" });
-    };
+    if (!overview) {
+        return <div style={{ padding: "2rem" }}>Loading...</div>;
+    }
 
     const handleCreateRecommendation = async (e) => {
         e.preventDefault();
@@ -75,13 +56,13 @@ function PatientDetailPage() {
             vaccineDisplay: recForm.vaccineDisplay,
             dueDate: recForm.dueDate || null,
             series: recForm.series || null,
-            doseNumber: recForm.doseNumber
-                ? parseInt(recForm.doseNumber, 10)
-                : null,
+            doseNumber: recForm.doseNumber ? parseInt(recForm.doseNumber) : null,
             notes: recForm.notes || null,
         };
+
         const created = await createRecommendation(patientId, payload);
         setRecommendations((prev) => [...prev, created]);
+
         setRecForm({
             vaccineCode: "",
             vaccineDisplay: "",
@@ -94,36 +75,33 @@ function PatientDetailPage() {
 
     const handleCreateAppointment = async (e) => {
         e.preventDefault();
+
         const payload = {
             patientId,
-            start: apptForm.start ? apptForm.start + ":00" : null, // "2025-01-10T09:00"
+            start: apptForm.start ? apptForm.start + ":00" : null,
             end: apptForm.end ? apptForm.end + ":00" : null,
             reason: apptForm.reason || null,
             location: apptForm.location || null,
         };
+
         const created = await createAppointment(payload);
         setAppointments((prev) => [...prev, created]);
+
         setApptForm({ start: "", end: "", reason: "", location: "" });
     };
-
-    const handleUpdateAppointmentStatus = async (id, status) => {
-        const updated = await updateAppointmentStatus(id, status);
-        setAppointments((prev) =>
-            prev.map((a) => (a.id === id ? updated : a))
-        );
-    };
-
-    if (!overview) {
-        return <div style={{ padding: "2rem" }}>Loading...</div>;
-    }
 
     const patient = overview.patient;
 
     return (
-        <div style={{ padding: "2rem" }}>
+        <div style={{ padding: "2rem",  background: "linear-gradient(135deg, #e8f1ff, #FFFBDE)",
+            minHeight: "100vh" }}>
             <h1>
-                {patient.fullName} ({patient.patientId})
+                <strong>ID: </strong>{patient.fullName} ({patient.patientId})
             </h1>
+            <p>
+                <strong>First name: </strong>{patient.firstName} &nbsp; | &nbsp;
+                <strong>Last name: </strong> {patient.lastName}
+            </p>
             <p>
                 <strong>Birth date:</strong> {patient.birthDate} &nbsp; | &nbsp;
                 <strong>Gender:</strong> {patient.gender}
@@ -155,13 +133,13 @@ function PatientDetailPage() {
             {/* CONTENT BY TAB */}
             {activeTab === "overview" && (
                 <div>
-                    <h2>Clinical overview</h2>
+                    <h2>Patient Clinical Dasboard - Immunizations overview</h2>
 
-                    {/* ENCOUNTERS */}
+                    {/* Encounters */}
                     <div style={{ marginTop: "2rem" }}>
                         <h3>Encounters</h3>
 
-                        {overview.encounters && overview.encounters.length > 0 ? (
+                        {overview.encounters?.length > 0 ? (
                             overview.encounters.map((enc) => (
                                 <div
                                     key={enc.encounter.encounterId}
@@ -174,29 +152,25 @@ function PatientDetailPage() {
                                     }}
                                 >
                                     <p>
-                                        <strong>Encounter ID:</strong> {enc.encounter.encounterId} <br/>
+                                        <strong>Encounter ID:</strong> {enc.encounter.encounterId}<br />
                                         <strong>Status:</strong> {enc.encounter.status}
                                     </p>
 
-                                    {/* Location */}
                                     {enc.location && (
                                         <p>
-                                            <strong>Location:</strong> {enc.location.name} <br/>
+                                            <strong>Location:</strong> {enc.location.name}<br />
                                             <strong>Managing organization:</strong> {enc.organization?.name}
                                         </p>
                                     )}
 
-                                    {/* Immunizations */}
                                     <div style={{ marginTop: "1rem" }}>
                                         <strong>Immunizations:</strong>
-                                        {enc.immunizations && enc.immunizations.length > 0 ? (
+                                        {enc.immunizations.length > 0 ? (
                                             <ul>
                                                 {enc.immunizations.map((imm) => (
                                                     <li key={imm.immunization.immunizationId}>
-                                                        {imm.immunization.occurrenceDateTime} – {imm.immunization.vaccineDisplay}
-                                                        {imm.practitioner && (
-                                                            <> (by Dr. {imm.practitioner.firstName} {imm.practitioner.lastName})</>
-                                                        )}
+                                                        {imm.immunization.occurrenceDateTime} –
+                                                        {imm.immunization.vaccineDisplay}
                                                     </li>
                                                 ))}
                                             </ul>
@@ -205,24 +179,6 @@ function PatientDetailPage() {
                                         )}
                                     </div>
 
-                                    {/* Observations */}
-                                    <div style={{ marginTop: "1rem" }}>
-                                        <strong>Observations:</strong>
-                                        {enc.observations && enc.observations.length > 0 ? (
-                                            <ul>
-                                                {enc.observations.map((obs) => (
-                                                    <li key={obs.observationId}>
-                                                        {obs.display}: {obs.value}
-                                                        {obs.unit && <> {obs.unit}</>}
-                                                        {" "}
-                                                        ({obs.effectiveDateTime})
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        ) : (
-                                            <p>No observations for this encounter.</p>
-                                        )}
-                                    </div>
                                 </div>
                             ))
                         ) : (
@@ -230,10 +186,10 @@ function PatientDetailPage() {
                         )}
                     </div>
 
-                    {/* ALLERGIES */}
+                    {/* Allergies */}
                     <div style={{ marginTop: "1rem" }}>
                         <h3>Allergies</h3>
-                        {overview.allergies && overview.allergies.length > 0 ? (
+                        {overview.allergies?.length > 0 ? (
                             <ul>
                                 {overview.allergies.map((a) => (
                                     <li key={a.allergyId}>
@@ -247,224 +203,111 @@ function PatientDetailPage() {
                             <p>No allergies recorded.</p>
                         )}
                     </div>
-
-
                 </div>
             )}
 
+            {/* IMMUNIZATIONS TAB */}
             {activeTab === "immunizations" && (
-                <div>
-                    <h2>Immunizations</h2>
+                <div style={{ padding: 15, border: "5px solid #ccc", background: "#fafafa"}}>
+                    <h2>Immunizations History: </h2>
+
                     <ul>
                         {immunizations.map((imm) => (
                             <li key={imm.immunizationId}>
-                                {imm.occurrenceDateTime} –  vaccine code CVX : {imm.vaccineCode} | {imm.vaccineDisplay} | status: ({imm.status}) | ID: {imm.immunizationId}
+                                CVX: {imm.vaccineCode} | {imm.vaccineDisplay} | ID: {imm.immunizationId} | <i>effective date:</i> {imm.occurrenceDateTime}
                             </li>
                         ))}
                     </ul>
 
-                    <h3 style={{ marginTop: "1.5rem" }}>Add immunization</h3>
-                    <form onSubmit={handleCreateImmunization}>
-                        <div>
-                            <label>Vaccine code      </label>
-                            <input
-                                value={immForm.vaccineCode}
-                                onChange={(e) =>
-                                    setImmForm({ ...immForm, vaccineCode: e.target.value })
-                                }
-                                required
-                            />
-                        </div>
-                        <p>
-
-                        </p>
-                        <div>
-                            <label>Vaccine display    </label>
-                            <input
-                                value={immForm.vaccineDisplay}
-                                onChange={(e) =>
-                                    setImmForm({ ...immForm, vaccineDisplay: e.target.value })
-                                }
-                                required
-                            />
-                        </div>
-                        <p>
-
-                        </p>
-                        <div>
-                            <label>Date (dd.mm.yy) </label>
-                            <input
-                                type="date"
-                                value={immForm.date}
-                                onChange={(e) =>
-                                    setImmForm({ ...immForm, date: e.target.value })
-                                }
-                            />
-                        </div>
-                        <p>
-
-                        </p>
-                        <div>
-                            <label>Status </label>
-                            <input
-                                value={immForm.status}
-                                onChange={(e) =>
-                                    setImmForm({ ...immForm, status: e.target.value })
-                                }
-                            />
-                        </div>
-                        <p>
-
-                        </p>
-                        <div>
-                            <label>Immunization ID </label>
-                            <input
-                                value={immForm.immunizationId}
-                                onChange={(e) =>
-                                    setImmForm({ ...immForm, immunizationId: e.target.value })
-                                }
-                            />
-                        </div>
-                        <p>
-
-                        </p>
-                        <button type="submit">Save immunization</button>
-                    </form>
+                    {/* HERE WE INSERT THE FHIR PUT PANEL */}
+                    <FHIRAdminPanel patientId={patientId} />
                 </div>
             )}
 
+            {/* RECOMMENDATIONS TAB */}
             {activeTab === "recommendations" && (
                 <div>
                     <h2>Immunization recommendations</h2>
                     <ul>
                         {recommendations.map((r) => (
                             <li key={r.id}>
-                                {r.vaccineDisplay} – due {r.dueDate} – status: {r.status}
+                                {r.vaccineDisplay} – due {r.dueDate} – status {r.status}
                             </li>
                         ))}
                     </ul>
 
                     <h3 style={{ marginTop: "1.5rem" }}>Add recommendation</h3>
+
                     <form onSubmit={handleCreateRecommendation}>
-                        <div>
-                            <label>Vaccine code</label>
-                            <input
-                                value={recForm.vaccineCode}
-                                onChange={(e) =>
-                                    setRecForm({ ...recForm, vaccineCode: e.target.value })
-                                }
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label>Vaccine display</label>
-                            <input
-                                value={recForm.vaccineDisplay}
-                                onChange={(e) =>
-                                    setRecForm({ ...recForm, vaccineDisplay: e.target.value })
-                                }
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label>Due date</label>
-                            <input
-                                type="date"
-                                value={recForm.dueDate}
-                                onChange={(e) =>
-                                    setRecForm({ ...recForm, dueDate: e.target.value })
-                                }
-                            />
-                        </div>
-                        <div>
-                            <label>Series</label>
-                            <input
-                                value={recForm.series}
-                                onChange={(e) =>
-                                    setRecForm({ ...recForm, series: e.target.value })
-                                }
-                            />
-                        </div>
-                        <div>
-                            <label>Dose number</label>
-                            <input
-                                type="number"
-                                value={recForm.doseNumber}
-                                onChange={(e) =>
-                                    setRecForm({ ...recForm, doseNumber: e.target.value })
-                                }
-                            />
-                        </div>
-                        <div>
-                            <label>Notes</label>
-                            <textarea
-                                value={recForm.notes}
-                                onChange={(e) =>
-                                    setRecForm({ ...recForm, notes: e.target.value })
-                                }
-                            />
-                        </div>
+                        <label>Vaccine code</label>
+                        <input
+                            value={recForm.vaccineCode}
+                            onChange={(e) => setRecForm({ ...recForm, vaccineCode: e.target.value })}
+                            required
+                        />
+
+                        <label>Vaccine display</label>
+                        <input
+                            value={recForm.vaccineDisplay}
+                            onChange={(e) => setRecForm({ ...recForm, vaccineDisplay: e.target.value })}
+                            required
+                        />
+
+                        <label>Due date</label>
+                        <input
+                            type="date"
+                            value={recForm.dueDate}
+                            onChange={(e) => setRecForm({ ...recForm, dueDate: e.target.value })}
+                        />
+
                         <button type="submit">Save recommendation</button>
                     </form>
+                    <div>
+                        <h3>Consent - Immunization recommendations:</h3>
+
+                        {/* To add the consent here */}
+                    </div>
                 </div>
+
+
             )}
 
+            {/* APPOINTMENTS TAB */}
             {activeTab === "appointments" && (
                 <div>
                     <h2>Appointments</h2>
+
                     <ul>
                         {appointments.map((a) => (
                             <li key={a.id}>
-                                {a.start} – {a.reason} – status {a.status}{" "}
-                                <button
-                                    onClick={() => handleUpdateAppointmentStatus(a.id, "cancelled")}
-                                >
-                                    Cancel
-                                </button>
+                                {a.start} – {a.reason} – status {a.status}
                             </li>
                         ))}
                     </ul>
 
-                    <h3 style={{ marginTop: "1.5rem" }}>Create appointment</h3>
+                    <h3>Create appointment</h3>
+
                     <form onSubmit={handleCreateAppointment}>
-                        <div>
-                            <label>Start (YYYY-MM-DDTHH:MM)</label>
-                            <input
-                                type="datetime-local"
-                                value={apptForm.start}
-                                onChange={(e) =>
-                                    setApptForm({ ...apptForm, start: e.target.value })
-                                }
-                            />
-                        </div>
-                        <div>
-                            <label>End (YYYY-MM-DDTHH:MM)</label>
-                            <input
-                                type="datetime-local"
-                                value={apptForm.end}
-                                onChange={(e) =>
-                                    setApptForm({ ...apptForm, end: e.target.value })
-                                }
-                            />
-                        </div>
-                        <div>
-                            <label>Reason</label>
-                            <input
-                                value={apptForm.reason}
-                                onChange={(e) =>
-                                    setApptForm({ ...apptForm, reason: e.target.value })
-                                }
-                            />
-                        </div>
-                        <div>
-                            <label>Location</label>
-                            <input
-                                value={apptForm.location}
-                                onChange={(e) =>
-                                    setApptForm({ ...apptForm, location: e.target.value })
-                                }
-                            />
-                        </div>
+                        <label>Start</label>
+                        <input
+                            type="datetime-local"
+                            value={apptForm.start}
+                            onChange={(e) => setApptForm({ ...apptForm, start: e.target.value })}
+                        />
+
+                        <label>End</label>
+                        <input
+                            type="datetime-local"
+                            value={apptForm.end}
+                            onChange={(e) => setApptForm({ ...apptForm, end: e.target.value })}
+                        />
+
+                        <label>Reason</label>
+                        <input
+                            value={apptForm.reason}
+                            onChange={(e) => setApptForm({ ...apptForm, reason: e.target.value })}
+                        />
+
                         <button type="submit">Save appointment</button>
                     </form>
                 </div>
