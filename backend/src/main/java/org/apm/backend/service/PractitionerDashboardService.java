@@ -3,6 +3,7 @@ package org.apm.backend.service;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.r5.model.*;
+
 import org.apm.backend.dto.practitioner.*;
 import org.apm.backend.mapper.PractitionerDashboardMapper;
 import org.springframework.security.core.Authentication;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -167,9 +169,7 @@ public class PractitionerDashboardService {
         return overview;
     }
 
-    // ─────────────────────────────────────────────────────────
     // ===== NEW METHODS FOR PRACTITIONER DASHBOARD =====
-    // ─────────────────────────────────────────────────────────
     public PatientDetailsDTO getPatientDetails(String patientId) {
         Patient patient = fhirClient.read()
                 .resource(Patient.class)
@@ -328,8 +328,6 @@ public class PractitionerDashboardService {
     }
 
 
-
-
     /** Helper: current username from Spring Security (e.g. "dr.smith"). */
     private String getCurrentUsername() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -418,6 +416,7 @@ public class PractitionerDashboardService {
 
     public ImmunizationDTO createImmunizationForPatient(String patientId,
                                                         CreateImmunizationRequest request) {
+
         Immunization imm = new Immunization();
 
         imm.setStatus(Immunization.ImmunizationStatusCodes.COMPLETED);
@@ -426,7 +425,7 @@ public class PractitionerDashboardService {
         // Vaccine code
         CodeableConcept cc = new CodeableConcept();
         Coding coding = cc.addCoding();
-        coding.setSystem("http://example.org/vaccine-codes"); // TODO: replace with real system
+        coding.setSystem("http://example.org/vaccine-codes");
         coding.setCode(request.getVaccineCode());
         coding.setDisplay(request.getVaccineDisplay());
         imm.setVaccineCode(cc);
@@ -438,12 +437,7 @@ public class PractitionerDashboardService {
             )));
         }
 
-        // Lot number
-        if (request.getLotNumber() != null && !request.getLotNumber().isBlank()) {
-            imm.setLotNumber(request.getLotNumber());
-        }
-
-        // Performer: use current practitioner if none passed
+        // Performer = logged-in practitioner
         Practitioner practitioner = getCurrentPractitioner();
         String pracId = practitioner.getIdElement().getIdPart();
 
@@ -451,9 +445,24 @@ public class PractitionerDashboardService {
         performer.setActor(new Reference("Practitioner/" + pracId));
         imm.addPerformer(performer);
 
-        MethodOutcome outcome = fhirClient.create()
-                .resource(imm)
-                .execute();
+        MethodOutcome outcome;
+
+        // CUSTOM IMMUNIZATION ID SUPPORT — PUT instead of POST
+        if (request.getImmunizationId() != null && !request.getImmunizationId().isBlank()) {
+
+            // Set custom ID
+            imm.setId("Immunization/" + request.getImmunizationId());
+
+            // PUT → update/create with specific ID
+            outcome = fhirClient.update()
+                    .resource(imm)
+                    .execute();
+        } else {
+            // POST → let FHIR server generate ID
+            outcome = fhirClient.create()
+                    .resource(imm)
+                    .execute();
+        }
 
         Immunization created = (Immunization) outcome.getResource();
         return toImmunizationDTO(created);
@@ -785,4 +794,113 @@ public class PractitionerDashboardService {
 
         return dto;
     }
+
+    public void createFullEncounter(String patientId, CreateFullEncounterRequest request) {
+
+        // ----------------------------------------
+        // 1) CREATE ENCOUNTER
+        // ----------------------------------------
+        Encounter encounter = new Encounter();
+
+        encounter.setId("Encounter/" + request.getEncounterId());
+        encounter.setStatus(Enumerations.EncounterStatus.COMPLETED);
+        encounter.setSubject(new Reference("Patient/" + patientId));
+
+        // Encounter date
+        if (request.getEncounterDate() != null) {
+            Period period = new Period();
+            period.setStart(Date.from(
+                    LocalDateTime.parse(request.getEncounterDate())
+                            .atZone(ZoneId.systemDefault())
+                            .toInstant()
+            ));
+
+            encounter.setActualPeriod(period);
+        }
+
+        // Organization
+        if (request.getOrganizationId() != null) {
+            encounter.setServiceProvider(
+                    new Reference("Organization/" + request.getOrganizationId())
+            );
+        }
+
+        // Location
+        if (request.getLocationId() != null) {
+            encounter.addLocation().setLocation(
+                    new Reference("Location/" + request.getLocationId())
+            );
+        }
+
+        fhirClient.update().resource(encounter).execute();
+
+
+        // ----------------------------------------
+        // 2) CREATE IMMUNIZATIONS
+        // ----------------------------------------
+        if (request.getImmunizations() != null) {
+            for (var immInput : request.getImmunizations()) {
+
+                Immunization imm = new Immunization();
+
+                imm.setId("Immunization/" + immInput.getImmunizationId());
+                imm.setStatus(Immunization.ImmunizationStatusCodes.COMPLETED);
+                imm.setPatient(new Reference("Patient/" + patientId));
+                imm.setEncounter(new Reference("Encounter/" + request.getEncounterId()));
+
+                imm.setVaccineCode(
+                        new CodeableConcept().addCoding(
+                                new Coding()
+                                        .setSystem("http://hl7.org/fhir/sid/cvx")
+                                        .setCode(immInput.getVaccineCode())
+                                        .setDisplay(immInput.getVaccineDisplay())
+                        )
+                );
+
+                if (immInput.getOccurrenceDateTime() != null) {
+                    imm.setOccurrence(
+                            new DateTimeType(immInput.getOccurrenceDateTime())
+                    );
+                }
+
+                fhirClient.update().resource(imm).execute();
+            }
+        }
+
+
+        // ----------------------------------------
+        // 3) CREATE OBSERVATIONS
+        // ----------------------------------------
+        if (request.getObservations() != null) {
+            for (var obsInput : request.getObservations()) {
+
+                Observation obs = new Observation();
+                obs.setId("Observation/" + obsInput.getObservationId());
+
+                obs.setStatus(Enumerations.ObservationStatus.FINAL);
+                obs.setSubject(new Reference("Patient/" + patientId));
+                obs.setEncounter(new Reference("Encounter/" + request.getEncounterId()));
+
+                obs.setCode(new CodeableConcept().addCoding(
+                        new Coding()
+                                .setCode(obsInput.getCode())
+                                .setDisplay(obsInput.getDisplay())
+                ));
+
+                obs.setValue(new Quantity()
+                        .setValue(Double.parseDouble(obsInput.getValue()))
+                        .setUnit(obsInput.getUnit())
+                );
+
+                if (obsInput.getEffectiveDateTime() != null) {
+                    obs.setEffective(new DateTimeType(obsInput.getEffectiveDateTime()));
+                }
+
+                fhirClient.update().resource(obs).execute();
+            }
+        }
+    }
+
+
+
 }
