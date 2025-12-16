@@ -40,11 +40,4 @@ public class AuthController {
         LoginResponseDTO response = authService.authenticate(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
-    // Register endpoint
-    @PostMapping("/auth/register")
-    public ResponseEntity<RegistrationResponseDTO> register(@RequestBody RegistrationRequestDTO request) {
-        authService.register(request);
-        return ResponseEntity.ok(new RegistrationResponseDTO("Practitioner registered successfully"));
-    }
 }

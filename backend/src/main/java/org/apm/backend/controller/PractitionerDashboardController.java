@@ -122,14 +122,6 @@ public class PractitionerDashboardController {
         dashboardService.createFullEncounter(patientId, request);
         return "OK";
     }
-// ─────────────────────────────────────────────────────────
-    // 7) Register patient
-    // ─────────────────────────────────────────────────────────
-
-    @PostMapping("/patients/register")
-    public PatientDetailsDTO registerPatient(@RequestBody RegisterPatientRequestDTO request) {
-       return dashboardService.registerPatient(request);
-   }
 
 
 }

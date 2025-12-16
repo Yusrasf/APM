@@ -10,8 +10,10 @@ export async function login(identifier, password) {
         password,
     });
 
+    // Server returns: { accessToken, practitioner }
     const { accessToken, practitioner } = response.data;
 
+    // Your original Basic Auth
     const basicToken = btoa(`${identifier}:${password}`);
 
     const authData = {
@@ -19,12 +21,11 @@ export async function login(identifier, password) {
         password,
         basicToken,
         accessToken,
-        practitioner,
+        practitioner
     };
 
+    // Save ONLY ONE THING in localStorage (your original behavior)
     localStorage.setItem(AUTH_KEY, JSON.stringify(authData));
-    localStorage.setItem("practitioner", JSON.stringify(practitioner));
-    localStorage.setItem("basicToken", basicToken);
 
     return authData;
 }
@@ -32,19 +33,14 @@ export async function login(identifier, password) {
 export function getAuth() {
     const raw = localStorage.getItem(AUTH_KEY);
     if (!raw) return null;
-    return JSON.parse(raw);
+
+    try {
+        return JSON.parse(raw);
+    } catch {
+        return null;
+    }
 }
 
 export function logout() {
     localStorage.removeItem(AUTH_KEY);
-    localStorage.removeItem("practitioner");
-    localStorage.removeItem("basicToken");
 }
-
-export const registerPractitioner = (identifier, password) => {
-    return axios.post(`${API_BASE_URL}/api/auth/register`, {
-        identifier,
-        password
-    });
-};
-

@@ -33,29 +33,19 @@ api.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+// ---- PRACTITIONER DASHBOARD -------------------------------------------------
 
-// ---- PATIENTS -------------------------------------------------------------
 export const fetchMyPatients = async () => {
-    try {
-        const res = await api.get("/api/practitioner/patients");
-        return res.data;
-    } catch (error) {
-        console.error("Error fetching patients:", error);
-        throw error;
-    }
+    const res = await api.get("/api/practitioner/patients");
+    return res.data;
 };
+
+// ---- OVERVIEW ---------------------------------------------------------------
 
 export const fetchPatientOverview = async (patientId) => {
-    try {
-        const res = await api.get(`/api/practitioner/patients/${patientId}/overview`);
-        return res.data;
-    } catch (error) {
-        console.error(`Error fetching overview for patient ${patientId}:`, error);
-        throw error;
-    }
+    const res = await api.get(`/api/practitioner/patients/${patientId}/overview`);
+    return res.data;
 };
-
-// ... rest of your functions (keep the same but remove debug logs) ...
 // ---- IMMUNIZATIONS --------------------------------------------------------
 
 export const fetchImmunizations = async (patientId) => {
