@@ -186,6 +186,7 @@ public class PractitionerDashboardService {
         Bundle bundle = fhirClient.search()
                 .forResource(Practitioner.class)
                 .where(Practitioner.IDENTIFIER.exactly().identifier(username))
+                .count(50)
                 .returnBundle(Bundle.class)
                 .execute();
 
@@ -199,14 +200,20 @@ public class PractitionerDashboardService {
     // ── 1) List patients assigned to this practitioner ────────────────────────
 
     public List<PatientDetailsDTO> getMyPatients() {
+
+
         Practitioner practitioner = getCurrentPractitioner();
         String practitionerId = practitioner.getIdElement().getIdPart();  // e.g. "123"
+
+        System.out.println("Practitioner ID: " + practitionerId);
 
         Bundle bundle = fhirClient.search()
                 .forResource(Patient.class)
                 .where(Patient.GENERAL_PRACTITIONER.hasId("Practitioner/" + practitionerId))
                 .returnBundle(Bundle.class)
                 .execute();
+
+        System.out.println("FHIR search returned " + bundle.getEntry().size() + " patients");
 
         return bundle.getEntry().stream()
                 .map(e -> (Patient) e.getResource())
@@ -250,6 +257,7 @@ public class PractitionerDashboardService {
                 .execute();
 
         Patient created = (Patient) outcome.getResource();
+
         return toPatientSummaryDTO(created);
     }
     private PatientDetailsDTO toPatientSummaryDTO(Patient patient) {

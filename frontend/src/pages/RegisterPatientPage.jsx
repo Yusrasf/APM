@@ -19,13 +19,14 @@ function RegisterPatientPage() {
         e.preventDefault();
         setLoading(true);
         setError("");
-
         try {
-            await registerPatient(form);
-            navigate("/practitioner"); // Go back to patient list
+            const createdPatient = await registerPatient(form);
+
+            navigate("/practitioner", {
+                state: { newlyCreatedPatient: createdPatient }
+            });
         } catch (err) {
-            console.error(err);
-            setError(err.response?.data?.message || "Failed to register patient");
+            setError("Failed to register patient");
         } finally {
             setLoading(false);
         }

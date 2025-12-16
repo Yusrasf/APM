@@ -1,14 +1,25 @@
 // src/pages/PractitionerPatientsPage.jsx
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { fetchMyPatients } from "../api/practitionerApi";
 
 function PractitionerPatientsPage() {
     const [patients, setPatients] = useState([]);
     const navigate = useNavigate();
-
+    const location = useLocation();
     useEffect(() => {
-        fetchMyPatients().then(setPatients).catch(console.error);
+        fetchMyPatients()
+            .then(data => {
+                if (location.state?.newlyCreatedPatient) {
+                    setPatients([
+                        location.state.newlyCreatedPatient,
+                        ...data
+                    ]);
+                } else {
+                    setPatients(data);
+                }
+            })
+            .catch(console.error);
     }, []);
 
     const handleRowClick = (id) => {
