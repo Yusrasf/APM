@@ -2,10 +2,8 @@ package org.apm.backend.service.impl;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import org.apm.backend.dto.practitioner.*;
 import org.hl7.fhir.r5.model.*;
-import org.apm.backend.dto.practitioner.LoginRequestDTO;
-import org.apm.backend.dto.practitioner.LoginResponseDTO;
-import org.apm.backend.dto.practitioner.RegistrationRequestDTO;
 import org.apm.backend.service.AuthService;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +18,56 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponseDTO authenticate(LoginRequestDTO request) {
-        // Your existing login logic
-        return new LoginResponseDTO();
+        System.out.println("Authenticating: " + request.getIdentifier());
+
+        // 1. Find practitioner
+        Bundle bundle = fhirClient.search()
+                .forResource(Practitioner.class)
+                .where(Practitioner.IDENTIFIER.exactly().systemAndIdentifier(
+                        "http://hospital.smarthealthit.org/practitioners",
+                        request.getIdentifier()
+                ))
+                .returnBundle(Bundle.class)
+                .execute();
+        System.out.println("DEBUG: Searching for identifier: " + request.getIdentifier());
+        System.out.println("DEBUG: Bundle has entries? " + bundle.hasEntry());
+        System.out.println("DEBUG: Bundle total: " + bundle.getTotal());
+        System.out.println("DEBUG: Bundle entries count: " + bundle.getEntry().size());
+        if (!bundle.hasEntry()) {
+            throw new RuntimeException("Practitioner not found");
+        }
+
+        Practitioner practitioner = (Practitioner) bundle.getEntryFirstRep().getResource();
+
+        // 2. Check password from extension
+        String storedPassword = null;
+        for (Extension ext : practitioner.getExtension()) {
+            if ("http://example.org/extensions/password".equals(ext.getUrl())) {
+                storedPassword = ((StringType) ext.getValue()).getValue();
+                break;
+            }
+        }
+
+        if (storedPassword == null || !storedPassword.equals(request.getPassword())) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        // 3. Create response
+        LoginResponseDTO response = new LoginResponseDTO();
+        response.setAccessToken("token-" + practitioner.getIdElement().getIdPart());
+
+        // Create PractitionerHeaderDTO
+        PractitionerHeaderDTO practitionerHeader = new PractitionerHeaderDTO();
+        practitionerHeader.setId(Long.valueOf(practitioner.getIdElement().getIdPart()));
+
+        if (practitioner.hasName()) {
+            HumanName name = practitioner.getNameFirstRep();
+            String fullName = name.getGivenAsSingleString() + " " + name.getFamily();
+            practitionerHeader.setFullName(fullName.trim());
+        }
+
+        response.setPractitioner(practitionerHeader);
+        return response;
     }
 
     @Override
@@ -33,7 +79,10 @@ public class AuthServiceImpl implements AuthService {
         // 1. Check if practitioner already exists
         Bundle bundle = fhirClient.search()
                 .forResource(Practitioner.class)
-                .where(Practitioner.IDENTIFIER.exactly().identifier(request.getIdentifier()))
+                .where(Practitioner.IDENTIFIER.exactly().systemAndIdentifier(
+                        "http://hospital.smarthealthit.org/practitioners",
+                        request.getIdentifier()
+                ))
                 .returnBundle(Bundle.class)
                 .execute();
 

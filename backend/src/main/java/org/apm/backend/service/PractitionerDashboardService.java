@@ -2,8 +2,7 @@ package org.apm.backend.service;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import
-        org.hl7.fhir.r5.model.*;
+import  org.hl7.fhir.r5.model.*;
 import org.apm.backend.dto.practitioner.*;
 import org.apm.backend.mapper.PractitionerDashboardMapper;
 import org.springframework.security.core.Authentication;
@@ -30,9 +29,7 @@ public class PractitionerDashboardService {
         this.mapper = mapper;
     }
 
-    // ─────────────────────────────────────────────────────────
-    // EXISTING METHOD – leave as-is
-    // ─────────────────────────────────────────────────────────
+
     public PatientClinicalOverviewDTO getPatientClinicalOverview(String patientId) {
 
         PatientClinicalOverviewDTO overview = new PatientClinicalOverviewDTO();
