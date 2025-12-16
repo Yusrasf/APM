@@ -40,16 +40,6 @@ const inputStyle = {
     fontSize: "0.95rem",
 };
 
-const buttonStyle = {
-    width: "100%",
-    padding: "0.7rem",
-    borderRadius: "6px",
-    border: "none",
-    cursor: "pointer",
-    fontWeight: 600,
-    fontSize: "0.95rem",
-};
-
 function LoginPage() {
     const navigate = useNavigate();
     const [identifier, setIdentifier] = useState("");
@@ -71,7 +61,7 @@ function LoginPage() {
 
             const response = await login(identifier, password);
 
-            // ⭐ FIX: store Basic Auth token for all backend requests
+            //  FIX: store Basic Auth token for all backend requests
             const basic = btoa(identifier + ":" + password);
             localStorage.setItem("basicToken", basic);
 
@@ -117,9 +107,9 @@ function LoginPage() {
             <div style={rightStyle}>
                 <div style={cardStyle}>
                     <h2>Practitioner Login</h2>
-                    <p style={{ marginBottom: "1.5rem", fontSize: "0.9rem", color: "#666" }}>
-                        Use the credentials from <code>practitioner-credentials.json</code>.
-                    </p>
+                    {/*  <p style={{ marginBottom: "1.5rem", fontSize: "0.9rem", color: "#666" }}>
+                   Use the credentials from <code>practitioner-credentials.json</code>.
+                  </p> */}
 
                     <form onSubmit={handlePractitionerLogin}>
                         <label style={{ fontSize: "0.85rem", fontWeight: 600 }}>
@@ -159,21 +149,23 @@ function LoginPage() {
                             type="submit"
                             disabled={loading}
                             className="navbar-btn"
-
                         >
                             {loading ? "Logging in..." : "Log in as practitioner"}
                         </button>
                     </form>
+
+                    <button
+                        type="button"
+                        onClick={() => navigate("/register-practitioner")}
+                        className="navbar-btn"
+
+                    >
+                        Create account
+                    </button>
+
                 </div>
 
-                <button
-                    type="button"
-                    onClick={() => navigate("/register-practitioner")}
-                    className="navbar-btn"
 
-                >
-                    Create account
-                </button>
             </div>
 
 

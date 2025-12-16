@@ -119,6 +119,15 @@ public class AuthServiceImpl implements AuthService {
                 .resource(practitioner)
                 .execute();
 
-        System.out.println("Registered practitioner with ID: " + outcome.getId().getIdPart());
+        String practitionerId = outcome.getId().getIdPart();
+
+// Fetch the newly created practitioner
+        Practitioner savedPractitioner = fhirClient.read()
+                .resource(Practitioner.class)
+                .withId(practitionerId)
+                .execute();
+
+        System.out.println("Saved practitioner full name: " +
+                (savedPractitioner.hasName() ? savedPractitioner.getNameFirstRep().getGivenAsSingleString() + " " + savedPractitioner.getNameFirstRep().getFamily() : "No name"));
     }
 }

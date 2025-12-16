@@ -9,7 +9,9 @@ import RegisterPatientPage from "./pages/RegisterPatientPage.jsx";
 import RegisterPractitionerPage from "./pages/RegisterPractitionerPage.jsx";
 
 function App() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(() => {
+        return !!localStorage.getItem("basicToken");
+    });
 
     // Check if user is logged in (has token)
     useEffect(() => {
